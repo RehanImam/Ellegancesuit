@@ -1,13 +1,136 @@
-body {
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background: #fff8fa;
+  color: #3c1723;
+}
+
+.font-serif {
+  font-family: "Playfair Display", serif;
+}
+
+/* Scrollbar */
+
+::-webkit-scrollbar {
+  width: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fff1f4;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #a6193d;
+  border-radius: 20px;
+}
+
+/* Selection */
+
+::selection {
+  background: #a6193d;
+  color: white;
+}
+
+/* Luxury gradient */
+
+.luxury-gradient {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255, 182, 193, 0.4),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(166, 25, 61, 0.15),
+      transparent 35%
+    ),
+    #fff7f9;
+}
+
+/* Product 3D */
+
+.product-3d {
+  transition:
+    transform 0.5s cubic-bezier(.2,.8,.2,1),
+    box-shadow 0.5s ease;
+  transform-style: preserve-3d;
+}
+
+.product-3d:hover {
+  transform:
+    perspective(1000px)
+    rotateX(3deg)
+    rotateY(-4deg)
+    translateY(-10px);
+}
+
+/* Glass */
+
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+/* Hide scrollbar */
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+/* Image zoom */
+
+.image-zoom {
+  overflow: hidden;
+}
+
+.image-zoom img {
+  transition: transform 0.7s ease;
+}
+
+.image-zoom:hover img {
+  transform: scale(1.08);
+}
+
+/* Button */
+
+.luxury-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.luxury-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,.2);
+  transition: .5s;
+}
+
+.luxury-button:hover::before {
+  left: 100%;
 }
