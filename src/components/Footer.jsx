@@ -234,7 +234,7 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Copyright */}
             <p className="text-pink-200/70 text-sm text-center md:text-left">
-              © 2026 ZARAA Women's Fashion. All rights reserved.
+              © 2026 ELEGANCE Women's Fashion. All rights reserved.
             </p>
 
             {/* Bottom Links */}
