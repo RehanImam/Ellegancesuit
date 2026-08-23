@@ -1,108 +1,119 @@
+
+
+
+import { useRef } from "react";
+import { Link } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Hero from "../components/Hero";
 import CategorySection from "../components/CategorySection";
-import ProductGrid from "../components/ProductGrid";
-import { products } from "../data/products";
-import { Link } from "react-router-dom";
+
+import imageOne from "../assets/imageone.jpeg";
+import imageTwo from "../assets/imagetwo.jpeg";
+import imageThree from "../assets/imagethree.jpeg";
+import imageFour from "../assets/imagefour.jpeg";
+
+const categoryList = [
+  { name: "ALL", category: "All", image: imageOne },
+  { name: "SHARARA SUIT", category: "Sharara Suit", image: imageTwo },
+  { name: "GARARA SUIT", category: "Garara Suit", image: imageThree },
+  { name: "PANT SUIT", category: "Pant Suit", image: imageFour },
+  { name: "FARSHI SHALWAR", category: "Farshi Shalwar Suit", image: imageOne },
+  { name: "FROCK SUIT", category: "Frock Suit", image: imageTwo },
+  { name: "GOWN", category: "Gown", image: imageThree },
+  { name: "LEHNGA", category: "Lehnga", image: imageFour },
+  { name: "PLAZO SUIT", category: "Plazo Suit", image: imageOne },
+];
 
 const Home = () => {
+  const scrollContainerRef = useRef(null);
 
-  const featuredProducts = products.slice(0, 4);
+  const handleScroll = (direction) => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = direction === "left" ? -250 : 250;
+      scrollContainerRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
 
   return (
-    <>
-
+    <div className="bg-pink-50/50 min-h-screen">
       <Hero />
-
       <CategorySection />
 
-      {/* Featured */}
-
-      <section className="py-20 bg-[#fff8fa]">
-
+      {/* Responsive Circular Category Slider */}
+      <section className="py-8 sm:py-12 bg-pink-50/50 border-t border-pink-100 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          <div className="flex items-end justify-between mb-10">
-
-            <div>
-
-              <p className="text-pink-500 uppercase tracking-[4px] text-xs font-semibold">
-                Our Favorites
-              </p>
-
-              <h2 className="font-serif text-4xl sm:text-5xl text-maroon-900 mt-2">
-                Trending Now
-              </h2>
-
-            </div>
-
-            <Link
-              to="/shop"
-              className="hidden sm:block text-maroon-700 font-medium"
-            >
-              View All →
-            </Link>
-
+          
+          <div className="text-center mb-6 sm:mb-10">
+            <h2 className="font-serif text-2xl sm:text-4xl text-rose-950 font-normal tracking-wide">
+              Shop By Category
+            </h2>
           </div>
 
-          <ProductGrid
-            products={featuredProducts}
-          />
-
-          <div className="text-center mt-10 sm:hidden">
-
-            <Link
-              to="/shop"
-              className="inline-block bg-maroon-800 text-white px-7 py-3 rounded-full"
+          <div className="relative group">
+            
+            {/* Left Scroll Arrow */}
+            <button
+              onClick={() => handleScroll("left")}
+              className="absolute -left-2 sm:-left-5 top-14 sm:top-1/2 sm:-translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-md hover:bg-gray-50 transition text-gray-800"
+              aria-label="Scroll left"
             >
-              View All Products
-            </Link>
+              <ChevronLeft size={18} />
+            </button>
+
+            {/* Horizontal Track */}
+            <div
+              ref={scrollContainerRef}
+              className="flex items-start gap-4 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth py-2 px-1"
+            >
+              {categoryList.map((item) => (
+                <Link
+                  key={item.category}
+                  to={`/shop?category=${encodeURIComponent(item.category)}`}
+                  className="flex flex-col items-center gap-2 sm:gap-4 group shrink-0"
+                >
+                  {/* Circle Frame: Phone (w-28 h-28) | Laptop (w-52 h-52) */}
+                  <div className="w-28 h-28 sm:w-52 sm:h-52 rounded-full overflow-hidden border border-gray-300 p-1 sm:p-1.5 bg-white transition-all duration-300 group-hover:border-rose-950 shadow-sm">
+                    <div className="w-full h-full rounded-full overflow-hidden">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="
+                          w-full
+                          h-full
+                          object-cover
+                          object-top
+                          group-hover:scale-105
+                          transition-transform
+                          duration-500
+                        "
+                      />
+                    </div>
+                  </div>
+
+                  <span className="text-gray-900 text-xs sm:text-base font-normal tracking-wide uppercase text-center max-w-[110px] sm:max-w-[160px] truncate group-hover:text-pink-600 transition-colors">
+                    {item.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
+
+            {/* Right Scroll Arrow */}
+            <button
+              onClick={() => handleScroll("right")}
+              className="absolute -right-2 sm:-right-5 top-14 sm:top-1/2 sm:-translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-md hover:bg-gray-50 transition text-gray-800"
+              aria-label="Scroll right"
+            >
+              <ChevronRight size={18} />
+            </button>
 
           </div>
 
         </div>
-
       </section>
-
-      {/* Promo */}
-
-      <section className="py-20">
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          <div className="rounded-[35px] bg-maroon-900 overflow-hidden relative">
-
-            <div className="absolute w-96 h-96 bg-pink-500/20 rounded-full blur-3xl -right-20 -top-20" />
-
-            <div className="relative p-10 sm:p-16 text-white max-w-2xl">
-
-              <p className="text-pink-300 uppercase tracking-[4px] text-xs">
-                Limited Time
-              </p>
-
-              <h2 className="font-serif text-4xl sm:text-5xl mt-4">
-                Your Wardrobe Deserves Something Beautiful.
-              </h2>
-
-              <p className="text-pink-100 mt-5 leading-7">
-                Get free shipping on orders above ₹2,999.
-              </p>
-
-              <Link
-                to="/shop"
-                className="inline-block mt-7 bg-white text-maroon-900 px-7 py-3 rounded-full font-medium"
-              >
-                Shop Now
-              </Link>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-    </>
+    </div>
   );
 };
 
