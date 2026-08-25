@@ -8,7 +8,7 @@ import {
   ArrowLeft,
   Search,
   X,
-  Sparkles,
+
 } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { products } from "../data/products";
@@ -75,10 +75,7 @@ const Shop = () => {
     updateFilters("", undefined);
   };
 
-  const clearCategoryOnly = () => {
-    setSelectedCategory("All");
-    updateFilters(undefined, "All");
-  };
+ 
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
@@ -120,8 +117,6 @@ const Shop = () => {
 
     return result;
   }, [searchTerm, selectedCategory, sort]);
-
-  const hasActiveFilters = Boolean(searchTerm.trim() || (selectedCategory && selectedCategory !== "All"));
 
   return (
     <main className="bg-[#fff8fa] min-h-screen py-8">
