@@ -8,8 +8,10 @@ import Footer from "./components/Footer";
 import CartDrawer from "./components/CartDrawer";
 import Loader from "./components/Loader";
 import BestSellers from "./components/BestSellers";
-import ExploreColors from "./components/ExploreColors"; // Added import
-import AboutStory from "./components/AboutStory"; // Added import
+import ExploreColors from "./components/ExploreColors"; 
+import NewArrivals from "./components/NewArrivals";
+import AboutStory from "./components/AboutStory"; 
+// import VideoGallery from "./components/VideoGallery";
 
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
@@ -59,7 +61,9 @@ const App = () => {
                 <>
                   <Home />
                   <BestSellers />
+                  {/* <VideoGallery /> */}
                   <ExploreColors />
+                  <NewArrivals />
                   <AboutStory />
                 </>
               }

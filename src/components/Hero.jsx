@@ -31,20 +31,19 @@ const Hero = () => {
 
             <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl font-bold text-maroon-900 leading-[1.05]">
 
-              Elegance
+              JANNAT ELEGANCE
 
               <br />
 
               <span className="text-pink-500">
-                Made For You
+                Designed for the Queen within.
               </span>
 
             </h1>
 
             <p className="mt-6 text-gray-600 max-w-lg leading-7">
-              Discover timeless Indian fashion designed
-              to make every moment beautiful. From
-              elegant frocks to luxurious suits.
+              Where Tradition Meets Timeless Elegance
+Discover thoughtfully designed ethnic wear created for the modern woman who carries herself with grace, confidence and individuality.
             </p>
 
             <div className="flex flex-wrap gap-4 mt-8">
