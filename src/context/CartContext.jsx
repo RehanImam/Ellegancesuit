@@ -6,6 +6,8 @@ import {
   useState,
 } from "react";
 
+import { products as allProducts } from "../data/products";
+
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
@@ -39,18 +41,24 @@ export const CartProvider = ({ children }) => {
     );
   }, [wishlist]);
 
-  const addToCart = (product, size = product.sizes?.[0]) => {
+  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
+
+  const openCartDrawer = () => setIsCartDrawerOpen(true);
+  const closeCartDrawer = () => setIsCartDrawerOpen(false);
+
+  const addToCart = (product, size = product?.sizes?.[0] || "M", showDrawer = true) => {
+    if (!product) return;
     setCart((prev) => {
       const existing = prev.find(
         (item) =>
           item.id === product.id &&
-          item.size === size
+          (size ? item.size === size : true)
       );
 
       if (existing) {
         return prev.map((item) =>
           item.id === product.id &&
-          item.size === size
+          (size ? item.size === size : true)
             ? {
                 ...item,
                 quantity: item.quantity + 1,
@@ -63,18 +71,22 @@ export const CartProvider = ({ children }) => {
         ...prev,
         {
           ...product,
-          size,
+          size: size || product?.sizes?.[0] || "M",
           quantity: 1,
         },
       ];
     });
+
+    if (showDrawer) {
+      setIsCartDrawerOpen(true);
+    }
   };
 
   const removeFromCart = (id, size) => {
     setCart((prev) =>
       prev.filter(
         (item) =>
-          !(item.id === id && item.size === size)
+          !(item.id === id && (size ? item.size === size : true))
       )
     );
   };
@@ -82,7 +94,7 @@ export const CartProvider = ({ children }) => {
   const increaseQuantity = (id, size) => {
     setCart((prev) =>
       prev.map((item) =>
-        item.id === id && item.size === size
+        item.id === id && (size ? item.size === size : true)
           ? {
               ...item,
               quantity: item.quantity + 1,
@@ -96,7 +108,7 @@ export const CartProvider = ({ children }) => {
     setCart((prev) =>
       prev
         .map((item) =>
-          item.id === id && item.size === size
+          item.id === id && (size ? item.size === size : true)
             ? {
                 ...item,
                 quantity: item.quantity - 1,
@@ -107,24 +119,43 @@ export const CartProvider = ({ children }) => {
     );
   };
 
-  const toggleWishlist = (product) => {
+  const clearCart = () => {
+    setCart([]);
+  };
+
+  const toggleWishlist = (productOrId) => {
+    if (!productOrId) return;
+    const productId = typeof productOrId === "object" ? productOrId.id : productOrId;
+
     setWishlist((prev) => {
-      const exists = prev.some(
-        (item) => item.id === product.id
-      );
+      const exists = prev.some((item) => item.id === productId);
 
       if (exists) {
-        return prev.filter(
-          (item) => item.id !== product.id
-        );
+        return prev.filter((item) => item.id !== productId);
       }
 
-      return [...prev, product];
+      let productToAdd = productOrId;
+      if (typeof productOrId !== "object" || !productOrId.images) {
+        productToAdd = allProducts.find((p) => p.id === productId) || productOrId;
+      }
+
+      return [...prev, productToAdd];
     });
   };
 
-  const isWishlisted = (id) =>
-    wishlist.some((item) => item.id === id);
+  const isWishlisted = (idOrProduct) => {
+    if (!idOrProduct) return false;
+    const targetId = typeof idOrProduct === "object" ? idOrProduct.id : idOrProduct;
+    return wishlist.some((item) => item.id === targetId);
+  };
+
+  const removeFromWishlist = (idOrProduct) => {
+    if (!idOrProduct) return;
+    const targetId = typeof idOrProduct === "object" ? idOrProduct.id : idOrProduct;
+    setWishlist((prev) =>
+      prev.filter((item) => item.id !== targetId)
+    );
+  };
 
   const cartCount = useMemo(
     () =>
@@ -134,6 +165,8 @@ export const CartProvider = ({ children }) => {
       ),
     [cart]
   );
+
+  const wishlistCount = wishlist.length;
 
   const subtotal = useMemo(
     () =>
@@ -160,12 +193,19 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         increaseQuantity,
         decreaseQuantity,
+        clearCart,
         toggleWishlist,
         isWishlisted,
+        removeFromWishlist,
         cartCount,
+        wishlistCount,
         subtotal,
         shipping,
         total,
+        isCartDrawerOpen,
+        openCartDrawer,
+        closeCartDrawer,
+        setIsCartDrawerOpen,
       }}
     >
       {children}

@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import {
   Heart,
   Menu,
@@ -10,34 +10,103 @@ import {
   LogOut,
   UserPlus,
   LogIn,
+  ArrowRight,
+  Sparkles,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { products } from "../data/products";
 
 // Logo import from assets
 import logoImg from "../assets/logo.jpeg";
 
-const Navbar = () => {
+const Navbar = ({ onOpenCart }) => {
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [authDropdownOpen, setAuthDropdownOpen] = useState(false);
 
   // Example auth state (replaces with your context/state management)
   const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const dropdownRef = useRef(null);
+  const searchContainerRef = useRef(null);
+  const searchInputRef = useRef(null);
 
-  const { cartCount, wishlist } = useCart();
+  const { cartCount, wishlist, openCartDrawer } = useCart();
 
-  // Outside clickhandler for Auth Dropdown
+  const handleOpenCart = () => {
+    if (onOpenCart) {
+      onOpenCart();
+    } else {
+      openCartDrawer();
+    }
+  };
+
+  // Popular search keywords
+  const popularKeywords = [
+    "Anarkali",
+    "Pakistani Suit",
+    "Party Frock",
+    "Sharara",
+    "Velvet",
+    "Rose Pink",
+  ];
+
+  // Live search filtered results (top 4)
+  const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    return products.filter((p) => {
+      const matchName = p.name?.toLowerCase().includes(q);
+      const matchCat = p.category?.toLowerCase().includes(q);
+      const matchDesc = p.description?.toLowerCase().includes(q);
+      const matchColor = p.colors?.some((c) => c.toLowerCase().includes(q));
+      return matchName || matchCat || matchDesc || matchColor;
+    }).slice(0, 4);
+  }, [searchQuery]);
+
+  const executeSearch = (queryToSearch) => {
+    const q = (queryToSearch || searchQuery).trim();
+    if (q) {
+      navigate(`/shop?search=${encodeURIComponent(q)}`);
+      setSearchOpen(false);
+      setMenuOpen(false);
+      setSearchQuery("");
+    }
+  };
+
+  const handleSearchFormSubmit = (e) => {
+    e.preventDefault();
+    executeSearch();
+  };
+
+  // Outside clickhandler for Auth Dropdown & Search Bar
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setAuthDropdownOpen(false);
       }
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        // Only close if clicked outside
+        const isSearchToggleBtn = event.target.closest('[data-search-toggle="true"]');
+        if (!isSearchToggleBtn) {
+          setSearchOpen(false);
+        }
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Auto-focus input when search is opened
+  useEffect(() => {
+    if (searchOpen) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 50);
+    }
+  }, [searchOpen]);
 
   return (
     <header className="sticky top-0 z-50 bg-[#fff8fa]/95 backdrop-blur-md border-b border-pink-200/60 shadow-sm w-full">
@@ -117,17 +186,22 @@ const Navbar = () => {
           <div className="flex items-center gap-2 sm:gap-4 text-rose-950">
             {/* Search Toggle */}
             <button
+              data-search-toggle="true"
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 rounded-full hover:bg-pink-100/60 text-rose-950 transition"
+              className={`p-2 rounded-full transition ${
+                searchOpen
+                  ? "bg-rose-900 text-white"
+                  : "hover:bg-pink-100/60 text-rose-950"
+              }`}
               aria-label="Search"
             >
-              <Search size={21} />
+              {searchOpen ? <X size={21} /> : <Search size={21} />}
             </button>
 
             {/* Wishlist Link */}
             <Link
               to="/wishlist"
-              className="relative p-2 rounded-full hover:bg-pink-100/60 transition hidden sm:block"
+              className="relative p-2 rounded-full hover:bg-pink-100/60 transition"
               aria-label="Wishlist"
             >
               <Heart size={21} />
@@ -138,19 +212,19 @@ const Navbar = () => {
               )}
             </Link>
 
-            {/* Shopping Cart */}
-            <Link
-              to="/cart"
+            {/* Shopping Cart Button */}
+            <button
+              onClick={handleOpenCart}
               className="relative p-2 rounded-full hover:bg-pink-100/60 transition"
               aria-label="Cart"
             >
               <ShoppingBag size={22} />
               {cartCount > 0 && (
-                <span className="absolute top-1 right-1 bg-rose-900 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
+                <span className="absolute top-1 right-1 bg-rose-900 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white ">
                   {cartCount}
                 </span>
               )}
-            </Link>
+            </button>
 
             {/* Desktop Auth Section / Profile Dropdown */}
             <div className="relative hidden sm:block" ref={dropdownRef}>
@@ -241,18 +315,134 @@ const Navbar = () => {
 
         {/* Search Bar Dropdown */}
         {searchOpen && (
-          <div className="pb-4">
+          <div
+            ref={searchContainerRef}
+            className="pb-5 pt-1 animate-in fade-in slide-in-from-top-3 duration-200"
+          >
             <div className="relative max-w-2xl mx-auto">
-              <Search
-                size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-700"
-              />
-              <input
-                type="text"
-                placeholder="Search frocks, suits, designer collection..."
-                className="w-full bg-pink-50/80 border border-pink-200 text-rose-950 rounded-full py-3 pl-11 pr-4 outline-none focus:border-rose-800 focus:ring-1 focus:ring-rose-800 transition placeholder:text-rose-400 text-sm"
-                autoFocus
-              />
+              {/* Search Form */}
+              <form
+                onSubmit={handleSearchFormSubmit}
+                className="relative flex items-center shadow-md rounded-full bg-white border border-pink-200/80 overflow-hidden focus-within:border-rose-800 focus-within:ring-2 focus-within:ring-rose-800/20 transition-all"
+              >
+                <button
+                  type="submit"
+                  aria-label="Search"
+                  className="pl-4 pr-2 text-rose-800 hover:text-rose-950 transition flex items-center justify-center"
+                >
+                  <Search size={20} />
+                </button>
+
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search frocks, suits, colors (e.g. Anarkali, Velvet, Pink)..."
+                  className="w-full bg-transparent text-rose-950 py-3.5 pl-2 pr-10 outline-none text-sm placeholder:text-rose-400/80 font-medium"
+                />
+
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      searchInputRef.current?.focus();
+                    }}
+                    className="p-2 text-rose-400 hover:text-rose-800 transition mr-1"
+                    aria-label="Clear search"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+
+                <button
+                  type="submit"
+                  className="hidden sm:flex items-center gap-1.5 bg-rose-900 hover:bg-rose-950 text-white text-xs font-semibold px-5 py-2.5 rounded-full mr-1.5 transition-all shadow-sm shrink-0"
+                >
+                  Search
+                  <ArrowRight size={13} />
+                </button>
+              </form>
+
+              {/* Floating Live Suggestions Dropdown */}
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white backdrop-blur-md rounded-2xl shadow-2xl border border-pink-100 p-4 z-50 overflow-hidden">
+                {searchQuery.trim() ? (
+                  searchResults.length > 0 ? (
+                    <div>
+                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-pink-100 text-xs font-semibold text-rose-950 uppercase tracking-wider">
+                        <span>Matching Products</span>
+                        <span className="text-pink-600 font-normal">{searchResults.length} found</span>
+                      </div>
+
+                      <div className="divide-y divide-pink-50">
+                        {searchResults.map((item) => (
+                          <Link
+                            key={item.id}
+                            to={`/product/${item.id}`}
+                            onClick={() => {
+                              setSearchOpen(false);
+                              setSearchQuery("");
+                            }}
+                            className="flex items-center gap-3 p-2 rounded-xl hover:bg-pink-50/70 transition group"
+                          >
+                            <img
+                              src={item.images?.[0]}
+                              alt={item.name}
+                              className="w-12 h-14 object-cover rounded-lg bg-pink-50 shrink-0 group-hover:scale-105 transition-transform"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-serif text-sm font-semibold text-rose-950 truncate group-hover:text-pink-700 transition">
+                                {item.name}
+                              </h4>
+                              <p className="text-xs text-rose-500">{item.category}</p>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <span className="text-sm font-bold text-rose-950">
+                                ₹{item.price.toLocaleString()}
+                              </span>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() => executeSearch()}
+                        className="w-full mt-3 py-2.5 bg-pink-50 hover:bg-pink-100 text-rose-900 text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5"
+                      >
+                        <span>View all results for &ldquo;{searchQuery}&rdquo;</span>
+                        <ArrowRight size={13} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="py-6 text-center text-rose-900">
+                      <p className="text-sm font-semibold">No products found for &ldquo;{searchQuery}&rdquo;</p>
+                      <p className="text-xs text-rose-500 mt-1">
+                        Try searching for keywords like &ldquo;Frock&rdquo;, &ldquo;Suit&rdquo;, or &ldquo;Rose&rdquo;
+                      </p>
+                    </div>
+                  )
+                ) : (
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-950 mb-2.5">
+                      <Sparkles size={14} className="text-pink-600" />
+                      <span>Popular Searches</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {popularKeywords.map((kw) => (
+                        <button
+                          key={kw}
+                          type="button"
+                          onClick={() => executeSearch(kw)}
+                          className="px-3.5 py-1.5 bg-pink-50 hover:bg-rose-900 hover:text-white text-rose-900 text-xs font-medium rounded-full transition-all border border-pink-200/60"
+                        >
+                          {kw}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -260,7 +450,30 @@ const Navbar = () => {
         {/* Mobile Nav Drawer + Login/Signup Buttons */}
         {menuOpen && (
           <div className="lg:hidden pb-5">
-            <nav className="flex flex-col gap-2 pt-4 border-t border-pink-200/60 font-medium text-rose-950 text-sm">
+            {/* Mobile Search Bar inside Drawer */}
+            <form
+              onSubmit={handleSearchFormSubmit}
+              className="relative my-3 flex items-center bg-pink-50 rounded-full border border-pink-200 px-3 py-2"
+            >
+              <Search size={16} className="text-rose-700 mr-2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products..."
+                className="bg-transparent text-rose-950 text-xs outline-none w-full placeholder:text-rose-400"
+              />
+              {searchQuery && (
+                <button
+                  type="submit"
+                  className="bg-rose-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-full ml-1"
+                >
+                  Go
+                </button>
+              )}
+            </form>
+
+            <nav className="flex flex-col gap-2 pt-2 border-t border-pink-200/60 font-medium text-rose-950 text-sm">
               <Link
                 onClick={() => setMenuOpen(false)}
                 to="/"
@@ -305,6 +518,21 @@ const Navbar = () => {
                   </span>
                 )}
               </Link>
+
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  handleOpenCart();
+                }}
+                className="px-3 py-2 rounded-lg hover:bg-pink-100/60 transition flex justify-between items-center text-left w-full"
+              >
+                <span>Shopping Bag</span>
+                {cartCount > 0 && (
+                  <span className="bg-rose-900 text-white text-xs px-2 py-0.5 rounded-full">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
 
               {/* Mobile Auth CTA Buttons */}
               <div className="pt-3 mt-2 border-t border-pink-200/60 flex gap-2">

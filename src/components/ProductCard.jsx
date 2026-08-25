@@ -49,6 +49,7 @@ const ProductCard = ({ product }) => {
           <button
             onClick={() =>
               toggleWishlist(product)
+              
             }
             className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-md"
           >
