@@ -7,6 +7,9 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import CartDrawer from "./components/CartDrawer";
 import Loader from "./components/Loader";
+import BestSellers from "./components/BestSellers";
+import ExploreColors from "./components/ExploreColors"; // Added import
+import AboutStory from "./components/AboutStory"; // Added import
 
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
@@ -15,7 +18,6 @@ import Cart from "./pages/Cart";
 
 import Login from "./auth/Login";
 import Signup from "./auth/Signup";
-
 
 const App = () => {
   // Loader state
@@ -39,7 +41,7 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-[#fff8fa]">
 
         {/* Navbar */}
         <Navbar
@@ -53,7 +55,14 @@ const App = () => {
 
             <Route
               path="/"
-              element={<Home />}
+              element={
+                <>
+                  <Home />
+                  <BestSellers />
+                  <ExploreColors />
+                  <AboutStory />
+                </>
+              }
             />
 
             <Route

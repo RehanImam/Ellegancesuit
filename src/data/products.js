@@ -20,7 +20,7 @@ export const products = [
     reviews: 124,
     description:
       "Elegant embroidered Anarkali frock crafted for festive occasions and special evenings. Designed with a graceful silhouette and beautiful detailing.",
-    sizes: ["S", "M", "L", "XL", "XXL"],
+    sizes: ["M", "L", "XL", "XXL", "2XL"],
     colors: ["Rose Pink", "Maroon"],
     images: [
       imageOne,
