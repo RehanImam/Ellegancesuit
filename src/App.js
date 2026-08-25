@@ -8,9 +8,12 @@ import Footer from "./components/Footer";
 import CartDrawer from "./components/CartDrawer";
 import Loader from "./components/Loader";
 import BestSellers from "./components/BestSellers";
-import ExploreColors from "./components/ExploreColors";
-import AboutStory from "./components/AboutStory";
+import ExploreColors from "./components/ExploreColors"; // Added import
+import AboutStory from "./components/AboutStory"; // Added import
 import ScrollToTop from "./components/ScrollToTop";
+import NewArrivals from "./components/NewArrivals";
+// import VideoGallery from "./components/VideoGallery";
+
 
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
@@ -30,20 +33,24 @@ const MainLayout = () => {
       {/* Navbar */}
       <Navbar onOpenCart={openCartDrawer} />
 
-      {/* Main Content */}
-      <div className="flex-1">
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <>
-                <Home />
-                <BestSellers />
-                <ExploreColors />
-                <AboutStory />
-              </>
-            }
-          />
+        {/* Main Content */}
+        <div className="flex-1">
+
+          <Routes>
+
+            <Route
+              path="/"
+              element={
+                <>
+                  <Home />
+                  <BestSellers />
+                  <ExploreColors />
+                  <NewArrivals />
+                  {/* <VideoGallery /> */}
+                  <AboutStory />
+                </>
+              }
+            />
 
           <Route
             path="/shop"
