@@ -134,7 +134,7 @@ const Checkout = () => {
   const [cardErrors, setCardErrors] = useState({});
 
   const [selectedBank, setSelectedBank] = useState("hdfc");
-  const [selectedWallet, setSelectedWallet] = useState("paytm");
+
   const [codCaptcha, setCodCaptcha] = useState("");
   const [generatedCaptcha] = useState(() =>
     Math.floor(1000 + Math.random() * 9000).toString()
@@ -388,9 +388,7 @@ const Checkout = () => {
         paymentDetails = { bank: selectedBank.toUpperCase(), mode: "Net Banking" };
       } else if (paymentMethod === "cod") {
         paymentDetails = { mode: "Cash on Delivery", status: "Payable on Delivery" };
-      } else if (paymentMethod === "wallet") {
-        paymentDetails = { wallet: selectedWallet, mode: "Digital Wallet" };
-      }
+      } 
 
       const orderData = {
         items: cart,
