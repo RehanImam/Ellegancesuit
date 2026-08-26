@@ -21,11 +21,13 @@ import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
 import Checkout from "./pages/Checkout";
+import Payment from "./pages/Payment";
 import OrderSuccess from "./pages/OrderSuccess";
 
 import Login from "./auth/Login";
 import Signup from "./auth/Signup";
 import { useCart } from "./context/CartContext";
+import HomePage from "./pages/Homepage";
 
 const MainLayout = () => {
   const { isCartDrawerOpen, closeCartDrawer, openCartDrawer } = useCart();
@@ -80,10 +82,18 @@ const MainLayout = () => {
           />
 
           <Route
+            path="/payment"
+            element={<Payment />}
+          />
+
+          <Route
             path="/order-success/:orderId"
             element={<OrderSuccess />}
           />
-
+           <Route
+           path="/test"
+           element={<HomePage />}
+           />
           <Route
             path="/order-success"
             element={<OrderSuccess />}
