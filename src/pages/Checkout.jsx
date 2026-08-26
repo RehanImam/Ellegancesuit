@@ -4,10 +4,8 @@ import {
   ArrowLeft,
   Check,
   CheckCircle2,
-
   CreditCard,
   Edit3,
-
   Home,
   Lock,
   MapPin,
@@ -20,7 +18,6 @@ import {
   Tag,
   Trash2,
   Truck,
-
   X,
   AlertCircle,
   Building2,
@@ -28,7 +25,6 @@ import {
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useAddress } from "../context/AddressContext";
-
 
 const COUPONS = [
   {
@@ -117,7 +113,7 @@ const Checkout = () => {
   const [couponSuccess, setCouponSuccess] = useState("");
 
   // Payment Method
-  const [paymentMethod, setPaymentMethod] = useState("upi"); // 'upi' | 'card' | 'netbanking' | 'cod' | 'wallet'
+  const [paymentMethod, setPaymentMethod] = useState("upi"); // 'upi' | 'card' | 'netbanking' | 'cod'
   
   // Payment Form Fields
   const [upiOption, setUpiOption] = useState("id"); // 'id' | 'qr'
@@ -134,7 +130,6 @@ const Checkout = () => {
   const [cardErrors, setCardErrors] = useState({});
 
   const [selectedBank, setSelectedBank] = useState("hdfc");
-
   const [codCaptcha, setCodCaptcha] = useState("");
   const [generatedCaptcha] = useState(() =>
     Math.floor(1000 + Math.random() * 9000).toString()
@@ -388,7 +383,7 @@ const Checkout = () => {
         paymentDetails = { bank: selectedBank.toUpperCase(), mode: "Net Banking" };
       } else if (paymentMethod === "cod") {
         paymentDetails = { mode: "Cash on Delivery", status: "Payable on Delivery" };
-      } 
+      }
 
       const orderData = {
         items: cart,
