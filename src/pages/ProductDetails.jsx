@@ -37,6 +37,13 @@ const ProductDetails = () => {
     }
   };
 
+  const handleBuyNow = () => {
+    for (let i = 0; i < quantity; i++) {
+      addToCart(product, selectedSize, false);
+    }
+    navigate("/checkout");
+  };
+
   return (
     <main className="bg-[#fff8fa] min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -217,13 +224,12 @@ const ProductDetails = () => {
                 Add to Cart
               </button>
 
-              <Link
-                to="/cart"
-                onClick={handleAddToCart}
-                className="border border-maroon-800 text-maroon-800 hover:bg-maroon-50 rounded-full py-4 flex items-center justify-center transition"
+              <button
+                onClick={handleBuyNow}
+                className="border border-maroon-800 text-maroon-800 hover:bg-maroon-50 rounded-full py-4 flex items-center justify-center font-medium transition"
               >
                 Buy Now
-              </Link>
+              </button>
             </div>
 
             {/* Benefits */}

@@ -212,9 +212,16 @@ const Cart = () => {
 
             </div>
 
-            <button className="w-full mt-7 bg-maroon-800 hover:bg-maroon-900 text-white py-4 rounded-full transition">
-              Proceed to Checkout
-            </button>
+            <Link
+              to="/checkout"
+              className="w-full mt-7 bg-maroon-800 hover:bg-maroon-900 text-white py-4 rounded-full font-semibold transition flex items-center justify-center gap-2 shadow-lg shadow-maroon-800/20 group"
+            >
+              <span>Proceed to Checkout</span>
+              <ArrowRight
+                size={18}
+                className="group-hover:translate-x-1 transition-transform"
+              />
+            </Link>
 
             <p className="text-center text-xs text-gray-400 mt-4">
               Secure checkout · Easy returns
