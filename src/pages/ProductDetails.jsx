@@ -7,7 +7,7 @@ import {
   ShoppingBag,
   Star,
 } from "lucide-react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { products } from "../data/products";
 import { useCart } from "../context/CartContext";
 
@@ -35,6 +35,13 @@ const ProductDetails = () => {
     for (let i = 0; i < quantity; i++) {
       addToCart(product, selectedSize);
     }
+  };
+
+  const handleBuyNow = () => {
+    for (let i = 0; i < quantity; i++) {
+      addToCart(product, selectedSize, false);
+    }
+    navigate("/checkout");
   };
 
   return (
@@ -217,13 +224,12 @@ const ProductDetails = () => {
                 Add to Cart
               </button>
 
-              <Link
-                to="/cart"
-                onClick={handleAddToCart}
-                className="border border-maroon-800 text-maroon-800 hover:bg-maroon-50 rounded-full py-4 flex items-center justify-center transition"
+              <button
+                onClick={handleBuyNow}
+                className="border border-maroon-800 text-maroon-800 hover:bg-maroon-50 rounded-full py-4 flex items-center justify-center font-medium transition"
               >
                 Buy Now
-              </Link>
+              </button>
             </div>
 
             {/* Benefits */}

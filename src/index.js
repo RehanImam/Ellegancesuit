@@ -5,19 +5,17 @@ import App from "./App";
 import "./index.css";
 
 import { CartProvider } from "./context/CartContext";
+import { AddressProvider } from "./context/AddressContext";
 
 ReactDOM.createRoot(
   document.getElementById("root")
 ).render(
-
   <React.StrictMode>
-
     <CartProvider>
-
-      <App />
-
+      <AddressProvider>
+        <App />
+      </AddressProvider>
     </CartProvider>
-
   </React.StrictMode>
-
 );
+

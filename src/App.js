@@ -20,6 +20,8 @@ import Shop from "./pages/Shop";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
+import Checkout from "./pages/Checkout";
+import OrderSuccess from "./pages/OrderSuccess";
 
 import Login from "./auth/Login";
 import Signup from "./auth/Signup";
@@ -70,6 +72,21 @@ const MainLayout = () => {
           <Route
             path="/wishlist"
             element={<Wishlist />}
+          />
+
+          <Route
+            path="/checkout"
+            element={<Checkout />}
+          />
+
+          <Route
+            path="/order-success/:orderId"
+            element={<OrderSuccess />}
+          />
+
+          <Route
+            path="/order-success"
+            element={<OrderSuccess />}
           />
 
           {/* Auth Routes */}
