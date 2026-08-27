@@ -23,7 +23,6 @@ import logoImg from "../assets/logo.jpeg";
 const Navbar = ({ onOpenCart }) => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  // const[profileMenu,setProfileMenu] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [authDropdownOpen, setAuthDropdownOpen] = useState(false);
@@ -175,12 +174,12 @@ const Navbar = ({ onOpenCart }) => {
               Suits
             </Link>
 
-            <a
+            <Link
               href="#about"
               className="hover:text-pink-600 transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-rose-900 hover:after:w-full after:transition-all"
             >
               About
-            </a>
+            </Link>
           </nav>
 
           {/* Action Icons & Login/Signup */}
@@ -226,14 +225,7 @@ const Navbar = ({ onOpenCart }) => {
                 </span>
               )}
             </button>
-            {/* <button
-              // onClick={()=>{setProfileMenu(!profileMenu)}}
-              className="relative p-2 rounded-full hover:bg-pink-100/60 transition"
-              aria-label="Cart"
-            >
-              <User size={22} />
-            
-            </button> */}
+           
 
             {/* Desktop Auth Section / Profile Dropdown */}
             <div className="relative hidden sm:block" ref={dropdownRef}>
