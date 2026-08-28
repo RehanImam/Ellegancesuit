@@ -23,6 +23,7 @@ import Wishlist from "./pages/Wishlist";
 import Checkout from "./pages/Checkout";
 import Payment from "./pages/Payment";
 import OrderSuccess from "./pages/OrderSuccess";
+import Profile from "./pages/Profile";
 
 import Login from "./auth/Login";
 import Signup from "./auth/Signup";
@@ -93,6 +94,11 @@ const MainLayout = () => {
           <Route
             path="/order-success"
             element={<OrderSuccess />}
+          />
+
+          <Route
+            path="/profile"
+            element={<Profile />}
           />
 
           {/* Auth Routes */}

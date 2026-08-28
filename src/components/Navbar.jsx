@@ -16,6 +16,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { products } from "../data/products";
+import { useAuth } from "../context/AuthContext";
 
 // Logo import from assets
 import logoImg from "../assets/logo.jpeg";
@@ -27,13 +28,12 @@ const Navbar = ({ onOpenCart }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [authDropdownOpen, setAuthDropdownOpen] = useState(false);
 
-  // Example auth state (replaces with your context/state management)
-  const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const dropdownRef = useRef(null);
   const searchContainerRef = useRef(null);
   const searchInputRef = useRef(null);
 
   const { cartCount, wishlist, openCartDrawer } = useCart();
+  const { user, isLoggedIn, logout } = useAuth();
 
   const handleOpenCart = () => {
     if (onOpenCart) {
@@ -276,7 +276,7 @@ const Navbar = ({ onOpenCart }) => {
                       <div className="pb-3 mb-2 border-b border-pink-100">
                         <p className="text-xs font-medium text-pink-600">Signed in as</p>
                         <p className="text-sm font-semibold text-rose-950 truncate">
-                          user@example.com
+                          {user?.email}
                         </p>
                       </div>
 
@@ -296,8 +296,8 @@ const Navbar = ({ onOpenCart }) => {
                           My Orders
                         </Link>
                         <button
-                          onClick={() => {
-                            setIsLoggedIn(false);
+                          onClick={async () => {
+                            await logout();
                             setAuthDropdownOpen(false);
                           }}
                           className="w-full text-left px-3 py-2 rounded-lg hover:bg-rose-50 text-rose-700 flex items-center gap-2 transition mt-1 border-t border-pink-100 pt-2"
