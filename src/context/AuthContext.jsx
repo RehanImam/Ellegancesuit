@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext(null);
-const API_BASE_URL = process.env.API_URL || "http://localhost:8000/api/v1";
+const API_BASE_URL = "https://auth-backend-gules.vercel.app/api/v1";
 
 const getErrorMessage = (payload, fallback) =>
   payload?.message || payload?.errors?.[0]?.msg || fallback;
