@@ -1,29 +1,43 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail, ArrowRight } from "lucide-react";
 import logoImg from "../assets/logo.jpeg";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading,setLoading] = useState(false);
+  const [error,setError] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const navigate = useNavigate();
+  const { login, startGoogleLogin } = useAuth();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+
   };
 
   // Handle Google Login
   const handleGoogleLogin = () => {
-    // Integration point: Trigger Google OAuth / Firebase Google Provider
-    console.log("Google Login Triggered");
+    startGoogleLogin();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Connect your authentication logic here
-    console.log("Logging in with:", formData);
+    setLoading(true);
+    setError("");
+    try {
+      await login(formData);
+      setFormData({ email: "", password: "" });
+      navigate("/profile");
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -85,6 +99,7 @@ const Login = () => {
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
+          {error && <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
           {/* Email Input */}
           <div>
             <label className="block text-xs font-semibold text-rose-950 uppercase tracking-wider mb-2">
@@ -147,9 +162,10 @@ const Login = () => {
           {/* Submit Button */}
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-rose-950 hover:bg-rose-900 text-white font-semibold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group text-sm"
           >
-            <span>Sign In</span>
+            <span>{loading ? "Signing In..." : "Sign In"}</span>
             <ArrowRight
               size={16}
               className="group-hover:translate-x-1 transition-transform"
