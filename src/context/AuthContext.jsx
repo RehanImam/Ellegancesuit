@@ -57,6 +57,15 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const verifyEmail = async (token) => {
+    if (!token) {
+      throw new Error("Verification token is missing.");
+    }
+
+    const payload = await request(`/auth/verify-email/${encodeURIComponent(token)}`);
+    return payload;
+  };
+
   const startGoogleLogin = () => {
     window.location.assign(`${API_BASE_URL}/auth/google`);
   };
@@ -70,6 +79,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        verifyEmail,
         startGoogleLogin,
       }}
     >
