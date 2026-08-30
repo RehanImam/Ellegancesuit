@@ -27,11 +27,13 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchUser = () =>
     request("/auth/me")
       .then((payload) => setUser(payload.data))
-      .catch(() => setUser(null))
-      .finally(() => setAuthLoading(false));
+      .catch(() => setUser(null));
+
+  useEffect(() => {
+    fetchUser().finally(() => setAuthLoading(false));
   }, []);
 
   const login = async (credentials) => {
@@ -70,6 +72,34 @@ export const AuthProvider = ({ children }) => {
     window.location.href = `${API_BASE_URL}/auth/google`;
   };
 
+  // --- Profile Management ---
+  const updateProfile = async ({ username, gender }) => {
+    const payload = await request("/auth/profile", {
+      method: "PATCH",
+      body: JSON.stringify({ username, gender }),
+    });
+    setUser(payload.data);
+    return payload;
+  };
+
+  const changeEmail = async (newEmail) => {
+    const payload = await request("/auth/change-email", {
+      method: "PATCH",
+      body: JSON.stringify({ newEmail }),
+    });
+    // Re-fetch user to get updated email
+    await fetchUser();
+    return payload;
+  };
+
+  const requestPasswordReset = async (email) => {
+    const payload = await request("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+    return payload;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -81,6 +111,9 @@ export const AuthProvider = ({ children }) => {
         logout,
         verifyEmail,
         startGoogleLogin,
+        updateProfile,
+        changeEmail,
+        requestPasswordReset,
       }}
     >
       {children}
