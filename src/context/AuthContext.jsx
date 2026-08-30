@@ -76,7 +76,13 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async ({ username, gender }) => {
     const payload = await request("/auth/profile", {
       method: "PATCH",
+      credentials: "include",
       body: JSON.stringify({ username, gender }),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+
     });
     setUser(payload.data);
     return payload;
