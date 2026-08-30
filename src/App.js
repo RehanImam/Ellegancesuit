@@ -27,6 +27,7 @@ import Profile from "./pages/Profile";
 
 import Login from "./auth/Login";
 import Signup from "./auth/Signup";
+import VerifyEmail from "./pages/VerifyEmail";
 import { useCart } from "./context/CartContext";
 
 const MainLayout = () => {
@@ -110,6 +111,11 @@ const MainLayout = () => {
           <Route
             path="/signup"
             element={<Signup />}
+          />
+
+          <Route
+            path="/verify-email/:token"
+            element={<VerifyEmail />}
           />
         </Routes>
       </div>
