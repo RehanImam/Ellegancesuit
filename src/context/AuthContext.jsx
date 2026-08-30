@@ -73,20 +73,25 @@ export const AuthProvider = ({ children }) => {
   };
 
   // --- Profile Management ---
-  const updateProfile = async ({ username, gender }) => {
-    const payload = await request("/auth/profile", {
-      method: "PATCH",
-      credentials: "include",
-      body: JSON.stringify({ username, gender }),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
-      },
+ const updateProfile = async ({ username, gender }) => {
+  const token = localStorage.getItem("accessToken");
+  const headers = { "Content-Type": "application/json" };
+  
+  // Only attach if it's a real token, otherwise rely on the cookie!
+  if (token && token !== "null") {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
 
-    });
-    setUser(payload.data);
-    return payload;
-  };
+  const payload = await request("/auth/profile", {
+    method: "PATCH",
+    credentials: "include", // This ensures your secure cookie is sent
+    body: JSON.stringify({ username, gender }),
+    headers,
+  });
+  
+  setUser(payload.data);
+  return payload;
+};
 
   const changeEmail = async (newEmail) => {
     const payload = await request("/auth/change-email", {
