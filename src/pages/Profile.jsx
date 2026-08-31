@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import {
   ShoppingBag,
   User,
@@ -15,9 +15,14 @@ import {
   Loader2,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import AddressSection from "../components/AddressSection";
+import OrdersSection from "../components/OrdersSection";
 
 const Profile = () => {
   const { user, isLoggedIn, authLoading, logout, updateProfile, changeEmail, requestPasswordReset } = useAuth();
+
+  // --- Active Tab State ---
+  const [activeTab, setActiveTab] = useState("profile");
 
   // --- Basic Info Edit State ---
   const [editingBasic, setEditingBasic] = useState(false);
@@ -169,34 +174,46 @@ const Profile = () => {
 
           {/* Sidebar Menu Items */}
           <nav className="w-full space-y-4 text-sm font-medium text-gray-700">
-            <a
-              href="#orders"
-              className="flex items-center gap-3 hover:text-black transition-colors"
+            <button
+              onClick={() => setActiveTab("orders")}
+              className={`flex items-center gap-3 w-full transition-colors ${
+                activeTab === "orders"
+                  ? "text-black font-semibold"
+                  : "hover:text-black"
+              }`}
             >
               <ShoppingBag size={18} />
               <span>My Orders</span>
-            </a>
-            <a
-              href="#profile"
-              className="flex items-center gap-3 text-black font-semibold"
+            </button>
+            <button
+              onClick={() => setActiveTab("profile")}
+              className={`flex items-center gap-3 w-full transition-colors ${
+                activeTab === "profile"
+                  ? "text-black font-semibold"
+                  : "hover:text-black"
+              }`}
             >
               <User size={18} />
               <span>My Profile</span>
-            </a>
-            <a
-              href="#addresses"
-              className="flex items-center gap-3 hover:text-black transition-colors"
+            </button>
+            <button
+              onClick={() => setActiveTab("addresses")}
+              className={`flex items-center gap-3 w-full transition-colors ${
+                activeTab === "addresses"
+                  ? "text-black font-semibold"
+                  : "hover:text-black"
+              }`}
             >
               <MapPin size={18} />
               <span>Addresses</span>
-            </a>
-            <a
-              href="#wishlist"
+            </button>
+            <Link
+              to="/wishlist"
               className="flex items-center gap-3 hover:text-black transition-colors"
             >
               <Heart size={18} />
               <span>My Wishlist</span>
-            </a>
+            </Link>
             <a
               href="#returns"
               className="flex items-center gap-3 hover:text-black transition-colors"
@@ -216,8 +233,18 @@ const Profile = () => {
 
         {/* Right Main Content */}
         <section className="flex-1 space-y-6">
-          {/* BASIC INFO Card */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          {/* Orders Section */}
+          {activeTab === "orders" && (
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <OrdersSection activeTab={activeTab} setActiveTab={setActiveTab} />
+            </div>
+          )}
+
+          {/* Profile Section */}
+          {activeTab === "profile" && (
+            <>
+              {/* BASIC INFO Card */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
             <div className="flex items-center justify-between pb-4 border-b border-gray-100">
               <h3 className="font-bold text-sm tracking-wider uppercase text-gray-900">
                 BASIC INFO
@@ -445,6 +472,15 @@ const Profile = () => {
               )}
             </div>
           </div>
+            </>
+          )}
+
+          {/* Addresses Section */}
+          {activeTab === "addresses" && (
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <AddressSection activeTab={activeTab} setActiveTab={setActiveTab} />
+            </div>
+          )}
         </section>
       </div>
     </main>
