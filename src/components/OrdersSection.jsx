@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   ShoppingBag,
   Loader2,
-  Eye,
   X,
   AlertCircle,
   ChevronDown,
@@ -20,13 +19,7 @@ const OrdersSection = ({ activeTab, setActiveTab }) => {
   const [expandedOrderId, setExpandedOrderId] = useState(null);
   const [cancellingOrderId, setCancellingOrderId] = useState(null);
 
-  useEffect(() => {
-    if (activeTab === "orders") {
-      fetchOrders();
-    }
-  }, [activeTab]);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getOrderHistory();
@@ -37,7 +30,13 @@ const OrdersSection = ({ activeTab, setActiveTab }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getOrderHistory]);
+
+  useEffect(() => {
+    if (activeTab === "orders") {
+      fetchOrders();
+    }
+  }, [activeTab, fetchOrders]);
 
   const handleCancelOrder = async (orderId) => {
     if (

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Edit2,
   X,
@@ -39,13 +39,7 @@ const AddressSection = ({ activeTab, setActiveTab }) => {
     isDefault: false,
   });
 
-  useEffect(() => {
-    if (activeTab === "addresses") {
-      fetchAddresses();
-    }
-  }, [activeTab]);
-
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getAddresses();
@@ -56,7 +50,13 @@ const AddressSection = ({ activeTab, setActiveTab }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getAddresses]);
+
+  useEffect(() => {
+    if (activeTab === "addresses") {
+      fetchAddresses();
+    }
+  }, [activeTab, fetchAddresses]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
