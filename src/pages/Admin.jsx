@@ -57,18 +57,6 @@ const Admin = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUrlChange = (index, value) => {
-    setForm((prev) => {
-      const nextImages = [...prev.images];
-      nextImages[index] = value;
-      return {
-        ...prev,
-        images: nextImages,
-        url: value || prev.url,
-      };
-    });
-  };
-
   const uploadToCloudinary = async (file) => {
     const signatureResponse = await fetch(`${API_BASE}/upload-signature`, {
       credentials: "include",
@@ -155,26 +143,53 @@ const Admin = () => {
     });
   };
 
-  const handleFileUpload = async (event) => {
+  const handleFrontImageUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     try {
       setLoading(true);
       const sourceFile = await compressImage(file);
-      const uploadLabel = sourceFile.size > 5 * 1024 * 1024 ? "Compressing and uploading image..." : "Uploading image to Cloudinary...";
-      setMessage(uploadLabel);
+      setMessage("Uploading front image...");
       const uploadedUrl = await uploadToCloudinary(sourceFile);
       setForm((prev) => ({
         ...prev,
         url: uploadedUrl,
-        images: [uploadedUrl, ...prev.images.slice(1, 5)].slice(0, 5),
+        images: prev.images.map((item, index) => (index === 0 ? uploadedUrl : item)),
       }));
-      setMessage("Image uploaded successfully.");
+      setMessage("Front image uploaded successfully.");
     } catch (error) {
-      setMessage(error.message || "Image upload failed");
+      setMessage(error.message || "Front image upload failed");
     } finally {
       setLoading(false);
+      event.target.value = "";
+    }
+  };
+
+  const handleImageSlotUpload = async (index, event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setLoading(true);
+      const sourceFile = await compressImage(file);
+      setMessage(`Uploading image ${index + 1}...`);
+      const uploadedUrl = await uploadToCloudinary(sourceFile);
+      setForm((prev) => {
+        const nextImages = [...prev.images];
+        nextImages[index] = uploadedUrl;
+        return {
+          ...prev,
+          images: nextImages,
+          url: prev.url || uploadedUrl,
+        };
+      });
+      setMessage(`Image ${index + 1} uploaded successfully.`);
+    } catch (error) {
+      setMessage(error.message || `Image ${index + 1} upload failed`);
+    } finally {
+      setLoading(false);
+      event.target.value = "";
     }
   };
 
@@ -364,18 +379,6 @@ const Admin = () => {
                     className="mt-2 w-full rounded-xl border border-pink-200 bg-pink-50 px-3 py-3 outline-none focus:border-rose-800"
                   />
                 </label>
-
-                <label className="block text-sm font-medium text-rose-900">
-                  Image URL
-                  <input
-                    type="url"
-                    name="url"
-                    value={form.url}
-                    onChange={handleInputChange}
-                    required
-                    className="mt-2 w-full rounded-xl border border-pink-200 bg-pink-50 px-3 py-3 outline-none focus:border-rose-800"
-                  />
-                </label>
               </div>
 
               <label className="block text-sm font-medium text-rose-900">
@@ -392,25 +395,51 @@ const Admin = () => {
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-rose-700">Images (up to 5)</h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-rose-700">Front Image</h3>
                   <label className="cursor-pointer rounded-full bg-rose-900 px-4 py-2 text-xs font-semibold text-white">
-                    Upload from device
-                    <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                    Upload front image
+                    <input type="file" accept="image/*" onChange={handleFrontImageUpload} className="hidden" />
                   </label>
                 </div>
 
+                {form.url && (
+                  <div className="overflow-hidden rounded-2xl border border-pink-200 bg-pink-50 p-2">
+                    <img src={form.url} alt="Front product preview" className="h-32 w-full object-cover rounded-xl" />
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-rose-700">Images 1 to 5</h3>
+
                 <div className="grid gap-3 md:grid-cols-2">
                   {form.images.map((image, index) => (
-                    <label key={`image-${index}`} className="block text-sm font-medium text-rose-900">
-                      Image {index + 1}
-                      <input
-                        type="url"
-                        value={image}
-                        onChange={(event) => handleImageUrlChange(index, event.target.value)}
-                        placeholder="Cloudinary URL or image link"
-                        className="mt-2 w-full rounded-xl border border-pink-200 bg-pink-50 px-3 py-3 outline-none focus:border-rose-800"
-                      />
-                    </label>
+                    <div key={`image-slot-${index}`} className="rounded-2xl border border-pink-200 bg-pink-50 p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-sm font-medium text-rose-900">Image {index + 1}</span>
+                        <label className="cursor-pointer rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold text-rose-900 border border-pink-200">
+                          Upload
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(event) => handleImageSlotUpload(index, event)}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+
+                      {image ? (
+  <img 
+    src={image} 
+    alt={`Product ${index + 1}`} 
+    className="mt-3 h-24 w-full object-cover rounded-xl border border-pink-200" 
+  />
+) : (
+  <div className="mt-3 flex h-24 items-center justify-center rounded-xl border border-dashed border-pink-300 text-xs text-pink-500">
+    No image selected
+  </div>
+)}
+                    </div>
                   ))}
                 </div>
               </div>
