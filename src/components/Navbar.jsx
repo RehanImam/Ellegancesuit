@@ -1,5 +1,4 @@
-
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
   Heart,
   Menu,
@@ -52,43 +51,53 @@ const Navbar = ({ onOpenCart }) => {
     "Rose Pink",
   ];
 
-  // Live search filtered results (top 4)
+  // Live search filtered results (top 4) - Fixed dependency array
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return [];
-    return mergedProducts.filter((p) => {
-      const matchName = p.name?.toLowerCase().includes(q);
-      const matchCat = p.category?.toLowerCase().includes(q);
-      const matchDesc = p.description?.toLowerCase().includes(q);
-      const matchColor = p.colors?.some((c) => c.toLowerCase().includes(q));
-      return matchName || matchCat || matchDesc || matchColor;
-    }).slice(0, 4);
-  }, [searchQuery]);
+    return (mergedProducts || [])
+      .filter((p) => {
+        const matchName = p.name?.toLowerCase().includes(q);
+        const matchCat = p.category?.toLowerCase().includes(q);
+        const matchDesc = p.description?.toLowerCase().includes(q);
+        const matchColor = p.colors?.some((c) => c.toLowerCase().includes(q));
+        return matchName || matchCat || matchDesc || matchColor;
+      })
+      .slice(0, 4);
+  }, [searchQuery, mergedProducts]);
 
-  const executeSearch = (queryToSearch) => {
-    const q = (queryToSearch || searchQuery).trim();
-    if (q) {
-      navigate(`/shop?search=${encodeURIComponent(q)}`);
-      setSearchOpen(false);
-      setMenuOpen(false);
-      setSearchQuery("");
-    }
-  };
+  const executeSearch = useCallback(
+    (queryToSearch) => {
+      const q = (queryToSearch || searchQuery).trim();
+      if (q) {
+        navigate(`/shop?search=${encodeURIComponent(q)}`);
+        setSearchOpen(false);
+        setMenuOpen(false);
+        setSearchQuery("");
+      }
+    },
+    [searchQuery, navigate]
+  );
 
   const handleSearchFormSubmit = (e) => {
     e.preventDefault();
     executeSearch();
   };
 
-  // Outside clickhandler for Auth Dropdown & Search Bar
+  // Outside click handler for Auth Dropdown & Search Bar
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setAuthDropdownOpen(false);
       }
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target)
+      ) {
         // Only close if clicked outside
-        const isSearchToggleBtn = event.target.closest('[data-search-toggle="true"]');
+        const isSearchToggleBtn = event.target.closest(
+          '[data-search-toggle="true"]'
+        );
         if (!isSearchToggleBtn) {
           setSearchOpen(false);
         }
@@ -101,9 +110,10 @@ const Navbar = ({ onOpenCart }) => {
   // Auto-focus input when search is opened
   useEffect(() => {
     if (searchOpen) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         searchInputRef.current?.focus();
       }, 50);
+      return () => clearTimeout(timer);
     }
   }, [searchOpen]);
 
@@ -111,7 +121,6 @@ const Navbar = ({ onOpenCart }) => {
     <header className="sticky top-0 z-50 bg-[#fff8fa]/95 backdrop-blur-md border-b border-pink-200/60 shadow-sm w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="h-20 flex items-center justify-between gap-4">
-
           {/* Left: Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -174,7 +183,7 @@ const Navbar = ({ onOpenCart }) => {
             </Link>
 
             <Link
-              href="#about"
+              to="/#about"
               className="hover:text-pink-600 transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-rose-900 hover:after:w-full after:transition-all"
             >
               About
@@ -224,7 +233,6 @@ const Navbar = ({ onOpenCart }) => {
                 </span>
               )}
             </button>
-           
 
             {/* Desktop Auth Section / Profile Dropdown */}
             <div className="relative hidden sm:block" ref={dropdownRef}>
@@ -273,7 +281,9 @@ const Navbar = ({ onOpenCart }) => {
                   ) : (
                     <div>
                       <div className="pb-3 mb-2 border-b border-pink-100">
-                        <p className="text-xs font-medium text-pink-600">Signed in as</p>
+                        <p className="text-xs font-medium text-pink-600">
+                          Signed in as
+                        </p>
                         <p className="text-sm font-semibold text-rose-950 truncate">
                           {user?.email}
                         </p>
@@ -381,7 +391,9 @@ const Navbar = ({ onOpenCart }) => {
                     <div>
                       <div className="flex items-center justify-between pb-2 mb-2 border-b border-pink-100 text-xs font-semibold text-rose-950 uppercase tracking-wider">
                         <span>Matching Products</span>
-                        <span className="text-pink-600 font-normal">{searchResults.length} found</span>
+                        <span className="text-pink-600 font-normal">
+                          {searchResults.length} found
+                        </span>
                       </div>
 
                       <div className="divide-y divide-pink-50">
@@ -404,11 +416,13 @@ const Navbar = ({ onOpenCart }) => {
                               <h4 className="font-serif text-sm font-semibold text-rose-950 truncate group-hover:text-pink-700 transition">
                                 {item.name}
                               </h4>
-                              <p className="text-xs text-rose-500">{item.category}</p>
+                              <p className="text-xs text-rose-500">
+                                {item.category}
+                              </p>
                             </div>
                             <div className="text-right shrink-0">
                               <span className="text-sm font-bold text-rose-950">
-                                ₹{item.price.toLocaleString()}
+                                ₹{item.price?.toLocaleString()}
                               </span>
                             </div>
                           </Link>
@@ -419,15 +433,20 @@ const Navbar = ({ onOpenCart }) => {
                         onClick={() => executeSearch()}
                         className="w-full mt-3 py-2.5 bg-pink-50 hover:bg-pink-100 text-rose-900 text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5"
                       >
-                        <span>View all results for &ldquo;{searchQuery}&rdquo;</span>
+                        <span>
+                          View all results for &ldquo;{searchQuery}&rdquo;
+                        </span>
                         <ArrowRight size={13} />
                       </button>
                     </div>
                   ) : (
                     <div className="py-6 text-center text-rose-900">
-                      <p className="text-sm font-semibold">No products found for &ldquo;{searchQuery}&rdquo;</p>
+                      <p className="text-sm font-semibold">
+                        No products found for &ldquo;{searchQuery}&rdquo;
+                      </p>
                       <p className="text-xs text-rose-500 mt-1">
-                        Try searching for keywords like &ldquo;Frock&rdquo;, &ldquo;Suit&rdquo;, or &ldquo;Rose&rdquo;
+                        Try searching for keywords like &ldquo;Frock&rdquo;,
+                        &ldquo;Suit&rdquo;, or &ldquo;Rose&rdquo;
                       </p>
                     </div>
                   )
