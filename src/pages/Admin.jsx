@@ -429,12 +429,16 @@ const Admin = () => {
                       </div>
 
                       {image ? (
-                        <img src={image} alt={`Product image ${index + 1}`} className="mt-3 h-24 w-full object-cover rounded-xl border border-pink-200" />
-                      ) : (
-                        <div className="mt-3 flex h-24 items-center justify-center rounded-xl border border-dashed border-pink-300 text-xs text-pink-500">
-                          No image selected
-                        </div>
-                      )}
+  <img 
+    src={image} 
+    alt={`Product ${index + 1}`} 
+    className="mt-3 h-24 w-full object-cover rounded-xl border border-pink-200" 
+  />
+) : (
+  <div className="mt-3 flex h-24 items-center justify-center rounded-xl border border-dashed border-pink-300 text-xs text-pink-500">
+    No image selected
+  </div>
+)}
                     </div>
                   ))}
                 </div>
