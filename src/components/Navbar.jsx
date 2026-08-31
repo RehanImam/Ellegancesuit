@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { products } from "../data/products";
 import { useAuth } from "../context/AuthContext";
 
 // Logo import from assets
@@ -32,7 +31,7 @@ const Navbar = ({ onOpenCart }) => {
   const searchContainerRef = useRef(null);
   const searchInputRef = useRef(null);
 
-  const { cartCount, wishlist, openCartDrawer } = useCart();
+  const { cartCount, wishlist, openCartDrawer, mergedProducts } = useCart();
   const { user, isLoggedIn, isAdmin, logout } = useAuth();
 
   const handleOpenCart = () => {
@@ -57,7 +56,7 @@ const Navbar = ({ onOpenCart }) => {
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return [];
-    return products.filter((p) => {
+    return mergedProducts.filter((p) => {
       const matchName = p.name?.toLowerCase().includes(q);
       const matchCat = p.category?.toLowerCase().includes(q);
       const matchDesc = p.description?.toLowerCase().includes(q);

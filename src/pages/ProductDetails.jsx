@@ -8,7 +8,6 @@ import {
   Star,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { products } from "../data/products";
 import { useCart } from "../context/CartContext";
 
 const ProductDetails = () => {
@@ -17,7 +16,9 @@ const ProductDetails = () => {
 
   const product = products.find((item) => item.id === Number(id));
 
-  const { addToCart, toggleWishlist, isWishlisted } = useCart();
+  const { addToCart, toggleWishlist, isWishlisted, mergedProducts } = useCart();
+
+  const product = mergedProducts.find((item) => String(item.id) === String(id));
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0]);
