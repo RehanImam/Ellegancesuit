@@ -10,6 +10,7 @@ const emptyForm = {
   price: "",
   description: "",
   url: "",
+  images: ["", "", "", "", ""],
   sizeStock: [
     { size: "S", quantity: 0 },
     { size: "M", quantity: 0 },
@@ -56,6 +57,127 @@ const Admin = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleImageUrlChange = (index, value) => {
+    setForm((prev) => {
+      const nextImages = [...prev.images];
+      nextImages[index] = value;
+      return {
+        ...prev,
+        images: nextImages,
+        url: value || prev.url,
+      };
+    });
+  };
+
+  const uploadToCloudinary = async (file) => {
+    const signatureResponse = await fetch(`${API_BASE}/upload-signature`, {
+      credentials: "include",
+    });
+    const signaturePayload = await signatureResponse.json();
+
+    if (!signatureResponse.ok || !signaturePayload.signature) {
+      throw new Error(signaturePayload.message || "Failed to get Cloudinary signature");
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("api_key", signaturePayload.apiKey);
+    formData.append("timestamp", String(signaturePayload.timestamp));
+    formData.append("signature", signaturePayload.signature);
+    formData.append("folder", "ellegancesuit/products");
+
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${signaturePayload.cloudName}/image/upload`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const payload = await response.json();
+    if (!response.ok || !payload.secure_url) {
+      throw new Error(payload.error?.message || "Cloudinary upload failed");
+    }
+
+    return payload.secure_url;
+  };
+
+  const compressImage = (file) => {
+    return new Promise((resolve, reject) => {
+      if (!file || file.size <= 5 * 1024 * 1024) {
+        resolve(file);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxDimension = 1600;
+          let { width, height } = img;
+
+          if (width > height) {
+            if (width > maxDimension) {
+              height = (height * maxDimension) / width;
+              width = maxDimension;
+            }
+          } else if (height > maxDimension) {
+            width = (width * maxDimension) / height;
+            height = maxDimension;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                reject(new Error("Image compression failed"));
+                return;
+              }
+
+              const compressedFile = new File([blob], file.name, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            },
+            "image/jpeg",
+            0.75
+          );
+        };
+        img.onerror = () => reject(new Error("Image read failed"));
+        img.src = reader.result;
+      };
+      reader.onerror = () => reject(new Error("File read failed"));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setLoading(true);
+      const sourceFile = await compressImage(file);
+      const uploadLabel = sourceFile.size > 5 * 1024 * 1024 ? "Compressing and uploading image..." : "Uploading image to Cloudinary...";
+      setMessage(uploadLabel);
+      const uploadedUrl = await uploadToCloudinary(sourceFile);
+      setForm((prev) => ({
+        ...prev,
+        url: uploadedUrl,
+        images: [uploadedUrl, ...prev.images.slice(1, 5)].slice(0, 5),
+      }));
+      setMessage("Image uploaded successfully.");
+    } catch (error) {
+      setMessage(error.message || "Image upload failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSizeChange = (size, quantity) => {
     setForm((prev) => ({
       ...prev,
@@ -71,8 +193,11 @@ const Admin = () => {
     setMessage("");
 
     try {
+      const imageList = [...form.images].map((item) => item.trim()).filter(Boolean).slice(0, 5);
       const payload = {
         ...form,
+        url: form.url || imageList[0] || "",
+        images: imageList,
         price: Number(form.price),
         sizeStock: form.sizeStock.filter((item) => item.quantity > 0),
       };
@@ -112,6 +237,9 @@ const Admin = () => {
       price: product.price || "",
       description: product.description || "",
       url: product.url || product.images?.[0] || "",
+      images: Array.isArray(product.images) && product.images.length > 0
+        ? [...product.images, ...Array(5).fill("")].slice(0, 5)
+        : [product.url || product.images?.[0] || "", "", "", "", ""],
       sizeStock: (product.sizeStock && product.sizeStock.length > 0)
         ? ["S", "M", "L", "XL", "XXL"].map((size) => {
             const match = product.sizeStock.find((item) => item.size === size);
@@ -261,6 +389,31 @@ const Admin = () => {
                   className="mt-2 w-full rounded-xl border border-pink-200 bg-pink-50 px-3 py-3 outline-none focus:border-rose-800"
                 />
               </label>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-rose-700">Images (up to 5)</h3>
+                  <label className="cursor-pointer rounded-full bg-rose-900 px-4 py-2 text-xs font-semibold text-white">
+                    Upload from device
+                    <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                  </label>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-2">
+                  {form.images.map((image, index) => (
+                    <label key={`image-${index}`} className="block text-sm font-medium text-rose-900">
+                      Image {index + 1}
+                      <input
+                        type="url"
+                        value={image}
+                        onChange={(event) => handleImageUrlChange(index, event.target.value)}
+                        placeholder="Cloudinary URL or image link"
+                        className="mt-2 w-full rounded-xl border border-pink-200 bg-pink-50 px-3 py-3 outline-none focus:border-rose-800"
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
 
               <div>
                 <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-rose-700">Stock by size</h3>

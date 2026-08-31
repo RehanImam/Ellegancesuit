@@ -6,7 +6,33 @@ import {
   useState,
 } from "react";
 
-import { products as allProducts } from "../data/products";
+import { products as staticProducts } from "../data/products";
+
+const normalizeProduct = (product, fallbackId = Date.now()) => {
+  const images = Array.isArray(product?.images) && product.images.length > 0
+    ? product.images
+    : Array.isArray(product?.image) && product.image.length > 0
+      ? product.image
+      : [product?.url || product?.imageUrl || ""];
+
+  return {
+    ...product,
+    id: product?.id ?? product?._id ?? fallbackId,
+    name: product?.name || product?.productName || "Untitled Product",
+    productName: product?.productName || product?.name || "Untitled Product",
+    category: product?.category || "Frocks",
+    price: Number(product?.price || 0),
+    oldPrice: Number(product?.oldPrice || product?.price || 0),
+    rating: Number(product?.rating || 0),
+    reviews: Number(product?.reviews || 0),
+    description: product?.description || "",
+    sizes: product?.sizes || product?.sizeStock?.map((item) => item.size) || ["M", "L"],
+    images: images.filter(Boolean),
+    badge: product?.badge || "",
+  };
+};
+
+const allProducts = [...staticProducts.map((product) => normalizeProduct(product, product.id))];
 
 const CartContext = createContext();
 
@@ -26,6 +52,24 @@ export const CartProvider = ({ children }) => {
       ? JSON.parse(savedWishlist)
       : [];
   });
+
+  const [dbProducts, setDbProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchDbProducts = async () => {
+      try {
+        const response = await fetch("https://auth-backend-gules.vercel.app/api/v1/products");
+        const payload = await response.json();
+        if (!response.ok) return;
+        const nextProducts = Array.isArray(payload.data) ? payload.data : [];
+        setDbProducts(nextProducts.map((product) => normalizeProduct(product, product._id || product.id)));
+      } catch (error) {
+        console.error("Failed to load DB products", error);
+      }
+    };
+
+    fetchDbProducts();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(
@@ -136,7 +180,7 @@ export const CartProvider = ({ children }) => {
 
       let productToAdd = productOrId;
       if (typeof productOrId !== "object" || !productOrId.images) {
-        productToAdd = allProducts.find((p) => p.id === productId) || productOrId;
+        productToAdd = mergedProducts.find((p) => p.id === productId) || productOrId;
       }
 
       return [...prev, productToAdd];
@@ -156,6 +200,11 @@ export const CartProvider = ({ children }) => {
       prev.filter((item) => item.id !== targetId)
     );
   };
+
+  const mergedProducts = useMemo(
+    () => [...allProducts, ...dbProducts],
+    [dbProducts]
+  );
 
   const cartCount = useMemo(
     () =>
