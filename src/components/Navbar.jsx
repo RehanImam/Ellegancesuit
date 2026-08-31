@@ -33,7 +33,7 @@ const Navbar = ({ onOpenCart }) => {
   const searchInputRef = useRef(null);
 
   const { cartCount, wishlist, openCartDrawer } = useCart();
-  const { user, isLoggedIn, logout } = useAuth();
+  const { user, isLoggedIn, isAdmin, logout } = useAuth();
 
   const handleOpenCart = () => {
     if (onOpenCart) {
@@ -288,6 +288,15 @@ const Navbar = ({ onOpenCart }) => {
                         >
                           My Profile
                         </Link>
+                        {isAdmin && (
+                          <Link
+                            to="/admin"
+                            onClick={() => setAuthDropdownOpen(false)}
+                            className="px-3 py-2 rounded-lg hover:bg-pink-50 transition text-rose-700 font-semibold"
+                          >
+                            Admin Panel
+                          </Link>
+                        )}
                         <Link
                           to="/orders"
                           onClick={() => setAuthDropdownOpen(false)}
