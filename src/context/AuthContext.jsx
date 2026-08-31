@@ -111,6 +111,74 @@ export const AuthProvider = ({ children }) => {
     return payload;
   };
 
+  // --- Address Management ---
+  const createAddress = async (addressData) => {
+    const payload = await request("/addresses", {
+      method: "POST",
+      body: JSON.stringify(addressData),
+    });
+    return payload;
+  };
+
+  const getAddresses = async () => {
+    const payload = await request("/addresses", {
+      method: "GET",
+    });
+    return payload;
+  };
+
+  const updateAddress = async (addressId, addressData) => {
+    const payload = await request(`/addresses/${addressId}`, {
+      method: "PATCH",
+      body: JSON.stringify(addressData),
+    });
+    return payload;
+  };
+
+  const deleteAddress = async (addressId) => {
+    const payload = await request(`/addresses/${addressId}`, {
+      method: "DELETE",
+    });
+    return payload;
+  };
+
+  const setDefaultAddress = async (addressId) => {
+    const payload = await request(`/addresses/${addressId}/set-default`, {
+      method: "PATCH",
+    });
+    return payload;
+  };
+
+  // --- Order Management ---
+  const createOrder = async (orderData) => {
+    const payload = await request("/orders", {
+      method: "POST",
+      body: JSON.stringify(orderData),
+    });
+    return payload;
+  };
+
+  const getOrderHistory = async () => {
+    const payload = await request("/orders", {
+      method: "GET",
+    });
+    return payload;
+  };
+
+  const getOrderById = async (orderId) => {
+    const payload = await request(`/orders/${orderId}`, {
+      method: "GET",
+    });
+    return payload;
+  };
+
+  const cancelOrder = async (orderId) => {
+    const payload = await request(`/orders/${orderId}/cancel`, {
+      method: "PATCH",
+    });
+    return payload;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -125,6 +193,15 @@ export const AuthProvider = ({ children }) => {
         updateProfile,
         changeEmail,
         requestPasswordReset,
+        createAddress,
+        getAddresses,
+        updateAddress,
+        deleteAddress,
+        setDefaultAddress,
+        createOrder,
+        getOrderHistory,
+        getOrderById,
+        cancelOrder,
       }}
     >
       {children}
