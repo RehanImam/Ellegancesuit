@@ -14,8 +14,6 @@ const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const product = products.find((item) => item.id === Number(id));
-
   const { addToCart, toggleWishlist, isWishlisted, mergedProducts } = useCart();
 
   const product = mergedProducts.find((item) => String(item.id) === String(id));
