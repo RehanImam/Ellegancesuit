@@ -26,6 +26,7 @@ const request = async (path, options = {}) => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const adminEmail = (process.env.REACT_APP_ADMIN_EMAIL || "shopowner@ellegancesuit.com").toLowerCase();
 
   const fetchUser = () =>
     request("/auth/me")
@@ -184,6 +185,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         isLoggedIn: Boolean(user),
+        isAdmin: Boolean(user?.isAdmin) || user?.email?.toLowerCase() === adminEmail,
         authLoading,
         login,
         register,

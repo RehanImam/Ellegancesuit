@@ -24,6 +24,7 @@ import Checkout from "./pages/Checkout";
 import Payment from "./pages/Payment";
 import OrderSuccess from "./pages/OrderSuccess";
 import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
 
 import Login from "./auth/Login";
 import Signup from "./auth/Signup";
@@ -100,6 +101,11 @@ const MainLayout = () => {
           <Route
             path="/profile"
             element={<Profile />}
+          />
+
+          <Route
+            path="/admin"
+            element={<Admin />}
           />
 
           {/* Auth Routes */}
