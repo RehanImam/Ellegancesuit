@@ -238,6 +238,7 @@ export const CartProvider = ({ children }) => {
       value={{
         cart,
         wishlist,
+        mergedProducts,
         addToCart,
         removeFromCart,
         increaseQuantity,
