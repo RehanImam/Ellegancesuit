@@ -115,7 +115,7 @@ const Shop = () => {
     }
 
     return result;
-  }, [searchTerm, selectedCategory, sort]);
+  }, [mergedProducts,searchTerm, selectedCategory, sort]);
 
   return (
     <main className="bg-[#fff8fa] min-h-screen py-8">
