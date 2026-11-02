@@ -20,9 +20,15 @@ import Shop from "./pages/Shop";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
+import Checkout from "./pages/Checkout";
+import Payment from "./pages/Payment";
+import OrderSuccess from "./pages/OrderSuccess";
+import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
 
 import Login from "./auth/Login";
 import Signup from "./auth/Signup";
+import VerifyEmail from "./pages/VerifyEmail";
 import { useCart } from "./context/CartContext";
 
 const MainLayout = () => {
@@ -72,6 +78,36 @@ const MainLayout = () => {
             element={<Wishlist />}
           />
 
+          <Route
+            path="/checkout"
+            element={<Checkout />}
+          />
+
+          <Route
+            path="/payment"
+            element={<Payment />}
+          />
+
+          <Route
+            path="/order-success/:orderId"
+            element={<OrderSuccess />}
+          />
+          
+          <Route
+            path="/order-success"
+            element={<OrderSuccess />}
+          />
+
+          <Route
+            path="/profile"
+            element={<Profile />}
+          />
+
+          <Route
+            path="/admin"
+            element={<Admin />}
+          />
+
           {/* Auth Routes */}
           <Route
             path="/login"
@@ -81,6 +117,11 @@ const MainLayout = () => {
           <Route
             path="/signup"
             element={<Signup />}
+          />
+
+          <Route
+            path="/verify-email/:token"
+            element={<VerifyEmail />}
           />
         </Routes>
       </div>

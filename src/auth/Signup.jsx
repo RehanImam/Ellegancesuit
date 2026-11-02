@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Eye, EyeOff, Lock, Mail, User, Phone, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, User, ArrowRight } from "lucide-react";
 import logoImg from "../assets/logo.jpeg";
+import { useAuth } from "../context/AuthContext";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false);
-  const [otpInput, setOtpInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const { register, startGoogleLogin } = useAuth();
 
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
-    phone: "",
     password: "",
   });
 
@@ -20,39 +21,24 @@ const Signup = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Trigger Send OTP
-  const handleSendOtp = () => {
-    if (!formData.phone || formData.phone.length < 10) {
-      alert("Please enter a valid phone number");
-      return;
-    }
-    setOtpSent(true);
-    // Integration point: Call backend API to send OTP here
-  };
-
-  // Verify OTP
-  const handleVerifyOtp = () => {
-    if (otpInput.length === 6) {
-      setOtpVerified(true);
-      // Integration point: Call backend API to verify OTP here
-    } else {
-      alert("Please enter a valid 6-digit OTP");
-    }
-  };
-
-  // Handle Google Signup
   const handleGoogleSignup = () => {
-    // Integration point: Trigger Google OAuth / Firebase Google Provider
-    console.log("Google Signup Triggered");
+    startGoogleLogin();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!otpVerified) {
-      alert("Please verify your phone number via OTP first!");
-      return;
+    setLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      const response = await register(formData);
+      setSuccess(response.message || "Account created. Please verify your email.");
+      setFormData({ fullName: "", email: "", password: "" });
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
-    console.log("Registering user:", formData);
   };
 
   return (
@@ -107,13 +93,15 @@ const Signup = () => {
         <div className="relative flex py-2 items-center mb-5">
           <div className="flex-grow border-t border-pink-200"></div>
           <span className="flex-shrink mx-4 text-[10px] font-bold tracking-wider text-rose-400 uppercase">
-            OR REGISTER WITH PHONE
+            OR REGISTER WITH EMAIL
           </span>
           <div className="flex-grow border-t border-pink-200"></div>
         </div>
 
         {/* Signup Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
+          {success && <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">{success}</p>}
           {/* Full Name */}
           <div>
             <label className="block text-xs font-semibold text-rose-950 uppercase tracking-wider mb-1.5">
@@ -158,74 +146,6 @@ const Signup = () => {
             </div>
           </div>
 
-          {/* Mobile + OTP Section */}
-          <div>
-            <label className="block text-xs font-semibold text-rose-950 uppercase tracking-wider mb-1.5">
-              Mobile Number
-            </label>
-            <div className="relative flex gap-2">
-              <div className="relative flex-1">
-                <Phone
-                  size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-400"
-                />
-                <input
-                  type="tel"
-                  name="phone"
-                  required
-                  disabled={otpVerified}
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="+91 9876543210"
-                  className="w-full bg-pink-50/50 border border-pink-200 text-rose-950 text-sm rounded-xl py-3 pl-11 pr-4 outline-none focus:border-rose-900 focus:ring-1 focus:ring-rose-900 transition placeholder:text-rose-300 disabled:opacity-70"
-                />
-              </div>
-              {!otpVerified && (
-                <button
-                  type="button"
-                  onClick={handleSendOtp}
-                  className="px-4 text-xs font-bold text-white bg-rose-900 hover:bg-rose-950 rounded-xl transition shadow-sm whitespace-nowrap"
-                >
-                  {otpSent ? "Resend" : "Send OTP"}
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* OTP Verification Input */}
-          {otpSent && !otpVerified && (
-            <div className="bg-pink-50/80 p-3 rounded-2xl border border-pink-200 animate-in fade-in duration-200">
-              <label className="block text-[11px] font-semibold text-rose-900 mb-1.5">
-                Enter 6-Digit OTP sent to {formData.phone}
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  maxLength={6}
-                  value={otpInput}
-                  onChange={(e) => setOtpInput(e.target.value)}
-                  placeholder="123456"
-                  className="flex-1 bg-white border border-pink-300 text-rose-950 text-center font-mono text-sm tracking-widest rounded-xl py-2 outline-none focus:border-rose-900"
-                />
-                <button
-                  type="button"
-                  onClick={handleVerifyOtp}
-                  className="px-4 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition shadow-sm"
-                >
-                  Verify
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* OTP Success Status */}
-          {otpVerified && (
-            <div className="flex items-center gap-1.5 text-emerald-700 text-xs font-semibold px-1">
-              <CheckCircle2 size={16} />
-              <span>Mobile Number Verified Successfully</span>
-            </div>
-          )}
-
           {/* Password */}
           <div>
             <label className="block text-xs font-semibold text-rose-950 uppercase tracking-wider mb-1.5">
@@ -258,9 +178,10 @@ const Signup = () => {
           {/* Submit Button */}
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-rose-950 hover:bg-rose-900 text-white font-semibold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group text-sm mt-2"
           >
-            <span>Register Now</span>
+            <span>{loading ? "Creating Account..." : "Register Now"}</span>
             <ArrowRight
               size={16}
               className="group-hover:translate-x-1 transition-transform"

@@ -312,21 +312,30 @@ const CartDrawer = ({ isOpen, onClose }) => {
 
               </div>
 
-              {/* Checkout */}
+              {/* Checkout Actions */}
+              <div className="mt-5 space-y-2">
+                <Link
+                  to="/checkout"
+                  onClick={onClose}
+                  className="w-full bg-maroon-800 hover:bg-maroon-900 text-white py-3.5 rounded-full flex items-center justify-center gap-2 transition font-semibold text-sm shadow-lg shadow-maroon-800/20 group"
+                >
+                  <span>Proceed to Checkout</span>
+                  <ArrowRight
+                    size={16}
+                    className="group-hover:translate-x-1 transition-transform"
+                  />
+                </Link>
 
-              <Link
-                to="/cart"
-                onClick={onClose}
-                className="mt-5 w-full bg-maroon-800 hover:bg-maroon-900 text-white py-4 rounded-full flex items-center justify-center gap-2 transition shadow-lg shadow-maroon-800/20"
-              >
+                <Link
+                  to="/cart"
+                  onClick={onClose}
+                  className="w-full block text-center py-2 text-xs font-semibold text-maroon-800 hover:text-maroon-950 transition hover:underline"
+                >
+                  View Shopping Bag
+                </Link>
+              </div>
 
-                View Cart & Checkout
-
-                <ArrowRight size={18} />
-
-              </Link>
-
-              <p className="text-center text-[10px] text-gray-400 mt-3">
+              <p className="text-center text-[10px] text-gray-400 mt-2">
                 Secure checkout · Easy returns · Premium packaging
               </p>
 
