@@ -10,11 +10,11 @@ const Footer = () => {
           {/* ================= BRAND ================= */}
           <div>
             <h2 className="font-serif text-3xl tracking-wide text-white">
-              JANNAT 
+              SHANAYA 
             </h2>
 
             <p className="text-[#F4A6B8] text-xs tracking-[5px] mt-2">
-              JANNAT ELENGANCE
+              SHANAYA COLLECTION
             </p>
 
             <p className="text-pink-100/80 leading-7 mt-6 max-w-sm">
@@ -220,7 +220,7 @@ const Footer = () => {
                 />
 
                 <span className="text-pink-100/80">
-                  hello@JANNAT ELENGANCE.com
+                  hello@SHANAYA COLLECTION.com
                 </span>
               </div>
             </div>

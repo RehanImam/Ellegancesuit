@@ -38,13 +38,13 @@ const AboutStory = () => {
           {/* Left Side Text Content */}
           <div className="lg:col-span-6 p-8 sm:p-12 lg:p-14 flex flex-col justify-center relative z-10">
             <span className="text-xs uppercase tracking-[0.25em] font-bold text-[#4a0e17] block mb-3">
-              About Jannat Elegance
+              About Shanaya collection
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[#4a0e17] font-semibold mb-5 leading-tight">
               Our Story
             </h2>
             <p className="text-gray-700 text-sm sm:text-base leading-relaxed mb-4 font-light">
-              Jannat Elegance was born from a love for timeless Indian fashion and the belief that every woman deserves to feel beautiful, confident and effortlessly elegant.
+              Shanaya collection was born from a love for timeless Indian fashion and the belief that every woman deserves to feel beautiful, confident and effortlessly elegant.
             </p>
             <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-8 font-light">
               We bring together traditional inspiration and contemporary design to create ethnic wear that feels graceful, luxurious and relevant to today's woman.
@@ -74,7 +74,7 @@ const AboutStory = () => {
               <div className="relative rounded-2xl overflow-hidden shadow-2xl transition-all duration-700 ease-out transform group-hover:-translate-y-3 group-hover:rotate-1 group-hover:scale-[1.02]">
                 <img
                   src={storyImage}
-                  alt="Jannat Elegance Story"
+                  alt="Shanaya collection Story"
                   className="w-full h-[420px] sm:h-[500px] object-cover object-top transition-transform duration-1000 ease-out group-hover:scale-110"
                 />
                 
@@ -119,7 +119,7 @@ const AboutStory = () => {
         <div>
           <div className="text-center mb-10">
             <h3 className="text-2xl sm:text-3xl font-serif text-[#4a0e17]">
-              Why Jannat Elegance?
+              Why Shanaya collection?
             </h3>
             <p className="text-gray-500 text-xs sm:text-sm mt-1 uppercase tracking-wider">
               True elegance lies in the little things
@@ -152,7 +152,7 @@ const AboutStory = () => {
         <div className="bg-white border-2 border-pink-200/60 p-8 sm:p-12 text-center shadow-sm rounded-2xl">
           <div className="max-w-2xl mx-auto space-y-4">
             <p className="text-[#4a0e17] italic font-serif text-lg sm:text-xl">
-              "Jannat Elegance is more than clothing. It is a feeling. It is confidence. It is the queen within you."
+              "Shanaya collection is more than clothing. It is a feeling. It is confidence. It is the queen within you."
             </p>
             
             <div className="w-16 h-0.5 bg-[#4a0e17] mx-auto my-4" />
@@ -164,7 +164,7 @@ const AboutStory = () => {
               Wear Your Elegance. Own Your Moment.
             </p>
             <p className="text-gray-600 text-xs sm:text-sm leading-relaxed font-light">
-              Whether it's a festive celebration, a family gathering, a special occasion or simply a day when you want to feel beautiful—Jannat Elegance is designed to be part of your moments.
+              Whether it's a festive celebration, a family gathering, a special occasion or simply a day when you want to feel beautiful—Shanaya collection is designed to be part of your moments.
             </p>
 
             <div className="pt-4">

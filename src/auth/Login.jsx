@@ -35,7 +35,7 @@ const Login = () => {
           <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-pink-300 shadow-sm mx-auto mb-3">
             <img
               src={logoImg}
-              alt="Jannat Elegance"
+              alt="Shanaya collection"
               className="w-full h-full object-cover"
             />
           </div>
@@ -43,7 +43,7 @@ const Login = () => {
             Welcome Back
           </h2>
           <p className="text-xs tracking-[2px] font-medium text-pink-600 uppercase mt-1">
-            Sign in to Jannat Elegance
+            Sign in to Shanaya collection
           </p>
         </div>
 
