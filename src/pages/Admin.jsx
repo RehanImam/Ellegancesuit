@@ -24,6 +24,19 @@ const uploadImageBatch = async (files, startIndex, compressImage, uploadToCloudi
     }
   }));
 
+const readApiResponse = async (response) => {
+  const body = await response.text();
+  try {
+    return body ? JSON.parse(body) : {};
+  } catch {
+    throw new Error(
+      response.status === 404
+        ? "Bulk upload route is not deployed. Trying the standard product upload route."
+        : `The server returned an unexpected response (${response.status}). Please check the backend deployment.`
+    );
+  }
+};
+
 const Admin = () => {
   const navigate = useNavigate();
   const { user, isAdmin, authLoading } = useAuth();
@@ -235,7 +248,7 @@ const Admin = () => {
       }
 
       setUpload((prev) => ({ ...prev, progress: `Creating ${uploadedUrls.length} products...` }));
-      const response = await fetch(`${API_BASE}/products/bulk`, {
+      const bulkResponse = await fetch(`${API_BASE}/products/bulk`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -249,13 +262,98 @@ const Admin = () => {
         }),
       });
 
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Bulk product creation failed");
+      let createdCount = 0;
+      let failedFiles = [];
 
-      setMessage(`${result.data.length} ${upload.category} products added${isBestSeller ? " to Best Sellers" : ""}.`);
-      setUpload((prev) => ({ ...prev, files: [], progress: "" }));
-      await fetchProducts();
-      await refreshProducts();
+      if (bulkResponse.status === 404) {
+        setUpload((prev) => ({
+          ...prev,
+          progress: "Bulk route not deployed; saving products individually...",
+        }));
+
+        const usedNames = new Set(
+          products.map((product) => String(product.productName || product.name || "").toLowerCase())
+        );
+        const categoryPrefix = upload.category.toLowerCase();
+        let nextSuffix = 1;
+        const productPayloads = uploadedUrls.map((url, index) => {
+          let productName = `${categoryPrefix} ${nextSuffix}`;
+          while (usedNames.has(productName)) {
+            nextSuffix += 1;
+            productName = `${categoryPrefix} ${nextSuffix}`;
+          }
+          usedNames.add(productName);
+          nextSuffix += 1;
+
+          return {
+            index,
+            payload: {
+              productName,
+              category: upload.category,
+              description: `Beautiful ${upload.category.toLowerCase()} design for festive and special occasions.`,
+              url,
+              images: [url],
+              price: CATEGORY_PRICES[upload.category],
+              originalPrice: 999,
+              totalQuantity: 0,
+              sizeStock: [],
+              isBestSeller,
+            },
+          };
+        });
+
+        const results = [];
+        for (let start = 0; start < productPayloads.length; start += 3) {
+          const batch = productPayloads.slice(start, start + 3);
+          setUpload((prev) => ({
+            ...prev,
+            progress: `Saving products: ${Math.min(start + batch.length, productPayloads.length)} of ${productPayloads.length}`,
+          }));
+
+          const batchResults = await Promise.all(batch.map(async ({ index, payload }) => {
+            try {
+              const response = await fetch(`${API_BASE}/products`, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `******"accessToken") || ""}`,
+                },
+                body: JSON.stringify(payload),
+              });
+              const result = await readApiResponse(response);
+              if (!response.ok) throw new Error(result.message || "Product creation failed");
+              return { index, success: true };
+            } catch (error) {
+              return { index, success: false, error };
+            }
+          }));
+          results.push(...batchResults);
+        }
+
+        const successfulResults = results.filter((result) => result.success);
+        const failedResults = results.filter((result) => !result.success);
+        createdCount = successfulResults.length;
+        failedFiles = failedResults.map((result) => upload.files[result.index]);
+
+        if (failedResults.length > 0) {
+          setMessage(
+            `${createdCount} of ${uploadedUrls.length} products added. ${failedResults.length} failed: ${failedResults[0].error.message}`
+          );
+        }
+      } else {
+        const result = await readApiResponse(bulkResponse);
+        if (!bulkResponse.ok) throw new Error(result.message || "Bulk product creation failed");
+        createdCount = Array.isArray(result.data) ? result.data.length : uploadedUrls.length;
+      }
+
+      if (createdCount > 0) {
+        if (failedFiles.length === 0) {
+          setMessage(`${createdCount} ${upload.category} products added${isBestSeller ? " to Best Sellers" : ""}.`);
+        }
+        await Promise.all([fetchProducts(), refreshProducts()]);
+      }
+      setUpload((prev) => ({ ...prev, files: failedFiles, progress: "" }));
     } catch (error) {
       setMessage(error.message || "Bulk image upload failed.");
       setUpload((prev) => ({ ...prev, progress: "" }));
@@ -364,7 +462,7 @@ const Admin = () => {
       </p>
 
       <label className="mt-4 block text-sm font-medium text-rose-900">
-        Product photos (up to 100)
+        Product photos (up to 100; use Ctrl+A to select all)
         <input
           type="file"
           accept="image/*"
