@@ -100,6 +100,8 @@ const ProductCard = ({ product }) => {
 
           </Link>
 
+          <p className="mt-1 text-xs text-gray-500">Sizes: S to 6XL</p>
+
           <div className="flex items-center gap-2 mt-2">
 
             <span className="font-semibold text-maroon-800">

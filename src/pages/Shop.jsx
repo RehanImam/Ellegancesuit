@@ -236,6 +236,7 @@ const Shop = () => {
                           {product.name}
                         </h3>
                       </Link>
+                      <p className="mt-1 text-[11px] text-gray-500">Sizes: S to 6XL</p>
                       <div className="flex items-center gap-2 mt-1">
                         <p className="text-[#4a0e17] font-bold text-sm sm:text-base">
                           ₹{product.price.toLocaleString()}

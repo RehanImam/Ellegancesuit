@@ -1,19 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { CATEGORY_PRICES, normalizeCategory, PRODUCT_CATEGORIES, PRODUCT_SIZES } from "../data/productOptions";
+import { CATEGORY_PRICES, normalizeCategory, PRODUCT_CATEGORIES } from "../data/productOptions";
 
 const API_BASE = "https://auth-backend-gules.vercel.app/api/v1";
 
 const emptyForm = {
-  productName: "",
   category: "Lehnga",
   price: CATEGORY_PRICES.Lehnga,
-  description: "",
   url: "",
   images: [],
   isBestSeller: false,
-  sizeStock: PRODUCT_SIZES.map((size) => ({ size, quantity: 0 })),
 };
 
 const Admin = () => {
@@ -24,6 +21,10 @@ const Admin = () => {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [bulkCategory, setBulkCategory] = useState("Lehnga");
+  const [bulkBestSeller, setBulkBestSeller] = useState(false);
+  const [bulkFiles, setBulkFiles] = useState([]);
+  const [bulkProgress, setBulkProgress] = useState("");
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
@@ -172,13 +173,86 @@ const Admin = () => {
     }
   };
 
-  const handleSizeChange = (size, quantity) => {
-    setForm((prev) => ({
-      ...prev,
-      sizeStock: prev.sizeStock.map((item) =>
-        item.size === size ? { ...item, quantity: Number(quantity) } : item
-      ),
-    }));
+  const handleBulkFilesChange = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length > 100) {
+      setMessage("Please select no more than 100 images at a time.");
+      setBulkFiles([]);
+    } else {
+      setMessage("");
+      setBulkFiles(files);
+    }
+    event.target.value = "";
+  };
+
+  const handleBulkUpload = async () => {
+    if (bulkFiles.length === 0) {
+      setMessage("Please select at least one product image.");
+      return;
+    }
+
+    setLoading(true);
+    setMessage("");
+    setBulkProgress(`Preparing ${bulkFiles.length} images...`);
+
+    try {
+      const uploadedUrls = Array(bulkFiles.length);
+      const uploadErrors = [];
+      let nextIndex = 0;
+      let completed = 0;
+
+      const uploadWorker = async () => {
+        while (nextIndex < bulkFiles.length) {
+          const index = nextIndex;
+          nextIndex += 1;
+          try {
+            const file = await compressImage(bulkFiles[index]);
+            uploadedUrls[index] = await uploadToCloudinary(file);
+          } catch (error) {
+            uploadErrors.push(`Image ${index + 1}: ${error.message}`);
+          } finally {
+            completed += 1;
+            setBulkProgress(`Uploading images: ${completed} of ${bulkFiles.length}`);
+          }
+        }
+      };
+
+      await Promise.all(
+        Array.from({ length: Math.min(3, bulkFiles.length) }, () => uploadWorker())
+      );
+
+      if (uploadErrors.length > 0) {
+        throw new Error(`${uploadErrors.length} image(s) could not be uploaded. ${uploadErrors[0]}`);
+      }
+
+      setBulkProgress(`Creating ${uploadedUrls.length} products...`);
+      const response = await fetch(`${API_BASE}/products/bulk`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `******"accessToken") || ""}`,
+        },
+        body: JSON.stringify({
+          category: bulkCategory,
+          images: uploadedUrls,
+          isBestSeller: bulkBestSeller,
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Bulk product creation failed");
+
+      setMessage(`${result.data.length} products added to ${bulkCategory}.`);
+      setBulkFiles([]);
+      setBulkProgress("");
+      await fetchProducts();
+    } catch (error) {
+      setMessage(error.message || "Bulk image upload failed.");
+      setBulkProgress("");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -190,12 +264,11 @@ const Admin = () => {
       const imageList = [...form.images].map((item) => item.trim()).filter(Boolean).slice(0, 1);
       const payload = {
         ...form,
-        productName: editingId ? form.productName : "",
         url: form.url || imageList[0] || "",
         images: imageList,
         price: CATEGORY_PRICES[form.category],
         originalPrice: 999,
-        sizeStock: form.sizeStock.filter((item) => item.quantity > 0),
+        sizeStock: [],
       };
 
       const method = editingId ? "PATCH" : "POST";
@@ -231,16 +304,9 @@ const Admin = () => {
       productName: product.productName || product.name || "",
       category: normalizeCategory(product.category),
       price: CATEGORY_PRICES[normalizeCategory(product.category)],
-      description: product.description || "",
       url: product.url || product.images?.[0] || "",
       images: [product.url || product.images?.[0] || ""].filter(Boolean),
       isBestSeller: Boolean(product.isBestSeller),
-      sizeStock: (product.sizeStock && product.sizeStock.length > 0)
-        ? PRODUCT_SIZES.map((size) => {
-            const match = product.sizeStock.find((item) => item.size === size);
-            return { size, quantity: match ? Number(match.quantity) : 0 };
-          })
-        : PRODUCT_SIZES.map((size) => ({ size, quantity: 0 })),
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -337,18 +403,6 @@ const Admin = () => {
                 </label>
               </div>
 
-              <label className="block text-sm font-medium text-rose-900">
-                Description
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleInputChange}
-                  rows="4"
-                  required
-                  className="mt-2 w-full rounded-xl border border-pink-200 bg-pink-50 px-3 py-3 outline-none focus:border-rose-800"
-                />
-              </label>
-
               <label className="flex items-center gap-3 text-sm font-medium text-rose-900">
                 <input
                   type="checkbox"
@@ -374,24 +428,6 @@ const Admin = () => {
                     <img src={form.url} alt="Product preview" className="h-32 w-full object-cover rounded-xl" />
                   </div>
                 )}
-              </div>
-
-              <div>
-                <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-rose-700">Stock by size</h3>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {form.sizeStock.map((item) => (
-                    <label key={item.size} className="flex items-center justify-between rounded-xl border border-pink-200 bg-pink-50 px-3 py-2">
-                      <span className="font-medium text-rose-900">{item.size}</span>
-                      <input
-                        type="number"
-                        min="0"
-                        value={item.quantity}
-                        onChange={(e) => handleSizeChange(item.size, e.target.value)}
-                        className="ml-3 w-20 rounded-lg border border-pink-200 bg-white px-2 py-2 text-right outline-none focus:border-rose-800"
-                      />
-                    </label>
-                  ))}
-                </div>
               </div>
 
               {message && (
@@ -423,6 +459,71 @@ const Admin = () => {
                 )}
               </div>
             </form>
+
+            {!editingId && (
+              <div className="mt-8 border-t border-pink-100 pt-6">
+                <h3 className="text-xl font-semibold text-rose-950">Bulk upload products</h3>
+                <p className="mt-1 text-sm text-rose-700">
+                  Select multiple images. Each image will become a separate product in the selected category.
+                </p>
+
+                <label className="mt-4 block text-sm font-medium text-rose-900">
+                  Category for all images
+                  <select
+                    value={bulkCategory}
+                    onChange={(event) => setBulkCategory(event.target.value)}
+                    disabled={loading}
+                    className="mt-2 w-full rounded-xl border border-pink-200 bg-pink-50 px-3 py-3 outline-none focus:border-rose-800"
+                  >
+                    {PRODUCT_CATEGORIES.map((category) => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="mt-4 block text-sm font-medium text-rose-900">
+                  Select product images
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    disabled={loading}
+                    onChange={handleBulkFilesChange}
+                    className="mt-2 block w-full rounded-xl border border-pink-200 bg-pink-50 p-3 text-sm"
+                  />
+                </label>
+
+                {bulkFiles.length > 0 && (
+                  <p className="mt-2 text-sm text-rose-700">
+                    {bulkFiles.length} image(s) selected · ₹{CATEGORY_PRICES[bulkCategory]} each
+                  </p>
+                )}
+
+                <label className="mt-4 flex items-center gap-3 text-sm font-medium text-rose-900">
+                  <input
+                    type="checkbox"
+                    checked={bulkBestSeller}
+                    onChange={(event) => setBulkBestSeller(event.target.checked)}
+                    disabled={loading}
+                    className="h-4 w-4 accent-rose-900"
+                  />
+                  Show all uploaded products in Best Sellers
+                </label>
+
+                {bulkProgress && (
+                  <p className="mt-3 text-sm font-medium text-rose-700">{bulkProgress}</p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleBulkUpload}
+                  disabled={loading || bulkFiles.length === 0}
+                  className="mt-4 rounded-full bg-rose-900 px-6 py-3 text-sm font-semibold text-white hover:bg-rose-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {loading ? "Uploading..." : `Upload ${bulkFiles.length || ""} Products`}
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="bg-white border border-pink-200 rounded-3xl shadow-sm p-6">
