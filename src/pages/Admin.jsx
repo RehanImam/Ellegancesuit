@@ -24,16 +24,12 @@ const uploadImageBatch = async (files, startIndex, compressImage, uploadToCloudi
     }
   }));
 
-const readApiResponse = async (response) => {
+const readApiResponse = async (response, operation) => {
   const body = await response.text();
   try {
     return body ? JSON.parse(body) : {};
   } catch {
-    throw new Error(
-      response.status === 404
-        ? "Bulk upload route is not deployed. Trying the standard product upload route."
-        : `The server returned an unexpected response (${response.status}). Please check the backend deployment.`
-    );
+    throw new Error(`${operation} returned a non-JSON response (HTTP ${response.status}). Check the backend deployment and API URL.`);
   }
 };
 
@@ -67,7 +63,7 @@ const Admin = () => {
   const fetchProducts = async () => {
     try {
       const response = await fetch(`${API_BASE}/products`, { credentials: "include" });
-      const payload = await response.json();
+      const payload = await readApiResponse(response, "Loading products");
       if (!response.ok) throw new Error(payload.message || "Failed to load products");
       setProducts(payload.data || []);
     } catch (error) {
@@ -96,7 +92,7 @@ const Admin = () => {
     const signatureResponse = await fetch(`${API_BASE}/upload-signature`, {
       credentials: "include",
     });
-    const signaturePayload = await signatureResponse.json();
+    const signaturePayload = await readApiResponse(signatureResponse, "Getting the image upload signature");
 
     if (!signatureResponse.ok || !signaturePayload.signature) {
       throw new Error(signaturePayload.message || "Failed to get Cloudinary signature");
@@ -114,7 +110,7 @@ const Admin = () => {
       body: formData,
     });
 
-    const payload = await response.json();
+    const payload = await readApiResponse(response, "Uploading an image to Cloudinary");
     if (!response.ok || !payload.secure_url) {
       throw new Error(payload.error?.message || "Cloudinary upload failed");
     }
@@ -247,111 +243,81 @@ const Admin = () => {
         throw new Error(`${uploadErrors.length} image(s) could not be uploaded. ${uploadErrors[0]}`);
       }
 
-      setUpload((prev) => ({ ...prev, progress: `Creating ${uploadedUrls.length} products...` }));
-      const bulkResponse = await fetch(`${API_BASE}/products/bulk`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `******"accessToken") || ""}`,
-        },
-        body: JSON.stringify({
-          category: upload.category,
-          images: uploadedUrls,
-          isBestSeller,
-        }),
+      setUpload((prev) => ({ ...prev, progress: `Saving ${uploadedUrls.length} products...` }));
+
+      const usedNames = new Set(
+        products.map((product) => String(product.productName || product.name || "").toLowerCase())
+      );
+      const categoryPrefix = upload.category.toLowerCase();
+      let nextSuffix = 1;
+      const productPayloads = uploadedUrls.map((url, index) => {
+        let productName = `${categoryPrefix} ${nextSuffix}`;
+        while (usedNames.has(productName)) {
+          nextSuffix += 1;
+          productName = `${categoryPrefix} ${nextSuffix}`;
+        }
+        usedNames.add(productName);
+        nextSuffix += 1;
+
+        return {
+          index,
+          payload: {
+            productName,
+            category: upload.category,
+            description: `Beautiful ${upload.category.toLowerCase()} design for festive and special occasions.`,
+            url,
+            images: [url],
+            price: CATEGORY_PRICES[upload.category],
+            originalPrice: 999,
+            totalQuantity: 0,
+            sizeStock: [],
+            isBestSeller,
+          },
+        };
       });
 
-      let createdCount = 0;
-      let failedFiles = [];
-
-      if (bulkResponse.status === 404) {
+      const results = [];
+      for (let start = 0; start < productPayloads.length; start += 3) {
+        const batch = productPayloads.slice(start, start + 3);
         setUpload((prev) => ({
           ...prev,
-          progress: "Bulk route not deployed; saving products individually...",
+          progress: `Saving products: ${Math.min(start + batch.length, productPayloads.length)} of ${productPayloads.length}`,
         }));
 
-        const usedNames = new Set(
-          products.map((product) => String(product.productName || product.name || "").toLowerCase())
-        );
-        const categoryPrefix = upload.category.toLowerCase();
-        let nextSuffix = 1;
-        const productPayloads = uploadedUrls.map((url, index) => {
-          let productName = `${categoryPrefix} ${nextSuffix}`;
-          while (usedNames.has(productName)) {
-            nextSuffix += 1;
-            productName = `${categoryPrefix} ${nextSuffix}`;
+        const batchResults = await Promise.all(batch.map(async ({ index, payload }) => {
+          try {
+            const response = await fetch(`${API_BASE}/products`, {
+              method: "POST",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `******"accessToken") || ""}`,
+              },
+              body: JSON.stringify(payload),
+            });
+            const result = await readApiResponse(response, `Saving product ${index + 1}`);
+            if (!response.ok) throw new Error(result.message || `Product ${index + 1} could not be saved`);
+            return { index, success: true };
+          } catch (error) {
+            return { index, success: false, error };
           }
-          usedNames.add(productName);
-          nextSuffix += 1;
-
-          return {
-            index,
-            payload: {
-              productName,
-              category: upload.category,
-              description: `Beautiful ${upload.category.toLowerCase()} design for festive and special occasions.`,
-              url,
-              images: [url],
-              price: CATEGORY_PRICES[upload.category],
-              originalPrice: 999,
-              totalQuantity: 0,
-              sizeStock: [],
-              isBestSeller,
-            },
-          };
-        });
-
-        const results = [];
-        for (let start = 0; start < productPayloads.length; start += 3) {
-          const batch = productPayloads.slice(start, start + 3);
-          setUpload((prev) => ({
-            ...prev,
-            progress: `Saving products: ${Math.min(start + batch.length, productPayloads.length)} of ${productPayloads.length}`,
-          }));
-
-          const batchResults = await Promise.all(batch.map(async ({ index, payload }) => {
-            try {
-              const response = await fetch(`${API_BASE}/products`, {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `******"accessToken") || ""}`,
-                },
-                body: JSON.stringify(payload),
-              });
-              const result = await readApiResponse(response);
-              if (!response.ok) throw new Error(result.message || "Product creation failed");
-              return { index, success: true };
-            } catch (error) {
-              return { index, success: false, error };
-            }
-          }));
-          results.push(...batchResults);
-        }
-
-        const successfulResults = results.filter((result) => result.success);
-        const failedResults = results.filter((result) => !result.success);
-        createdCount = successfulResults.length;
-        failedFiles = failedResults.map((result) => upload.files[result.index]);
-
-        if (failedResults.length > 0) {
-          setMessage(
-            `${createdCount} of ${uploadedUrls.length} products added. ${failedResults.length} failed: ${failedResults[0].error.message}`
-          );
-        }
-      } else {
-        const result = await readApiResponse(bulkResponse);
-        if (!bulkResponse.ok) throw new Error(result.message || "Bulk product creation failed");
-        createdCount = Array.isArray(result.data) ? result.data.length : uploadedUrls.length;
+        }));
+        results.push(...batchResults);
       }
 
-      if (createdCount > 0) {
-        if (failedFiles.length === 0) {
-          setMessage(`${createdCount} ${upload.category} products added${isBestSeller ? " to Best Sellers" : ""}.`);
-        }
+      const successfulResults = results.filter((result) => result.success);
+      const failedResults = results.filter((result) => !result.success);
+      const failedFiles = failedResults.map((result) => upload.files[result.index]);
+
+      if (successfulResults.length > 0) {
         await Promise.all([fetchProducts(), refreshProducts()]);
+      }
+      if (failedResults.length > 0) {
+        setMessage(
+          `${successfulResults.length} of ${uploadedUrls.length} products added. ${failedResults.length} failed: ${failedResults[0].error.message}`
+        );
+      } else {
+        setMessage(`${successfulResults.length} ${upload.category} products added${isBestSeller ? " to Best Sellers" : ""}.`);
       }
       setUpload((prev) => ({ ...prev, files: failedFiles, progress: "" }));
     } catch (error) {
