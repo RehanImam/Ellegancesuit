@@ -8,7 +8,13 @@ import {
 } from "react";
 
 import { products as staticProducts } from "../data/products";
-import { CATEGORY_PRICES, normalizeCategory, PRODUCT_SIZES } from "../data/productOptions";
+import {
+  CATEGORY_PRICES,
+  getProductDisplayName,
+  isBestSellerProduct,
+  normalizeCategory,
+  PRODUCT_SIZES,
+} from "../data/productOptions";
 
 const normalizeProduct = (product, fallbackId = Date.now()) => {
   const images = Array.isArray(product?.images) && product.images.length > 0
@@ -20,7 +26,7 @@ const normalizeProduct = (product, fallbackId = Date.now()) => {
   return {
     ...product,
     id: product?.id ?? product?._id ?? fallbackId,
-    name: product?.name || product?.productName || "Untitled Product",
+    name: getProductDisplayName(product?.name || product?.productName) || "Untitled Product",
     productName: product?.productName || product?.name || "Untitled Product",
     category: normalizeCategory(product?.category),
     price: CATEGORY_PRICES[normalizeCategory(product?.category)],
@@ -29,7 +35,7 @@ const normalizeProduct = (product, fallbackId = Date.now()) => {
     reviews: Number(product?.reviews || 0),
     description: product?.description || "",
     sizes: PRODUCT_SIZES,
-    isBestSeller: Boolean(product?.isBestSeller),
+    isBestSeller: isBestSellerProduct(product),
     images: images.filter(Boolean),
     badge: product?.badge || "",
   };

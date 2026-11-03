@@ -2,7 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-import { CATEGORY_PRICES, normalizeCategory, PRODUCT_CATEGORIES } from "../data/productOptions";
+import {
+  CATEGORY_PRICES,
+  getProductDisplayName,
+  getStoredProductName,
+  isBestSellerProduct,
+  normalizeCategory,
+  PRODUCT_CATEGORIES,
+} from "../data/productOptions";
 
 const API_BASE = "https://auth-backend-gules.vercel.app/api/v1";
 
@@ -249,12 +256,13 @@ const Admin = () => {
         products.map((product) => String(product.productName || product.name || "").toLowerCase())
       );
       const categoryPrefix = upload.category.toLowerCase();
+      const productNamePrefix = isBestSeller ? `best-seller:${categoryPrefix}` : categoryPrefix;
       let nextSuffix = 1;
       const productPayloads = uploadedUrls.map((url, index) => {
-        let productName = `${categoryPrefix} ${nextSuffix}`;
+        let productName = `${productNamePrefix} ${nextSuffix}`;
         while (usedNames.has(productName)) {
           nextSuffix += 1;
-          productName = `${categoryPrefix} ${nextSuffix}`;
+          productName = `${productNamePrefix} ${nextSuffix}`;
         }
         usedNames.add(productName);
         nextSuffix += 1;
@@ -338,6 +346,7 @@ const Admin = () => {
       const imageList = [...form.images].map((item) => item.trim()).filter(Boolean).slice(0, 1);
       const payload = {
         category: form.category,
+        productName: getStoredProductName(form.productName, form.isBestSeller),
         url: form.url || imageList[0] || "",
         images: imageList,
         price: CATEGORY_PRICES[form.category],
@@ -373,9 +382,10 @@ const Admin = () => {
     setEditingId(product._id || product.id);
     setForm({
       category: normalizeCategory(product.category),
+      productName: getProductDisplayName(product.productName || product.name),
       url: product.url || product.images?.[0] || "",
       images: [product.url || product.images?.[0] || ""].filter(Boolean),
-      isBestSeller: Boolean(product.isBestSeller),
+      isBestSeller: isBestSellerProduct(product),
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -397,6 +407,31 @@ const Admin = () => {
       await Promise.all([fetchProducts(), refreshProducts()]);
     } catch (error) {
       setMessage(error.message);
+    }
+  };
+
+  const handleToggleBestSeller = async (product) => {
+    const shouldBeBestSeller = !isBestSellerProduct(product);
+    try {
+      const response = await fetch(`${API_BASE}/products/${product._id || product.id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `******"accessToken") || ""}`,
+        },
+        body: JSON.stringify({
+          productName: getStoredProductName(product.productName || product.name, shouldBeBestSeller),
+          isBestSeller: shouldBeBestSeller,
+        }),
+      });
+      const result = await readApiResponse(response, "Updating Best Sellers");
+      if (!response.ok) throw new Error(result.message || "Best Seller status could not be updated");
+
+      setMessage(shouldBeBestSeller ? "Product added to Best Sellers." : "Product removed from Best Sellers.");
+      await Promise.all([fetchProducts(), refreshProducts()]);
+    } catch (error) {
+      setMessage(error.message || "Best Seller status could not be updated.");
     }
   };
 
@@ -600,24 +635,31 @@ const Admin = () => {
                         className="h-20 w-20 rounded-xl object-cover"
                       />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate font-semibold text-rose-950">{product.productName || product.name}</p>
+                        <p className="truncate font-semibold text-rose-950">{getProductDisplayName(product.productName || product.name)}</p>
                                         <p className="text-sm text-rose-700">{normalizeCategory(product.category)}</p>
                                         <p className="text-sm text-rose-900">₹{CATEGORY_PRICES[normalizeCategory(product.category)].toLocaleString()}</p>
                         <p className="text-xs text-rose-700">Stock: {Number(product.totalQuantity || 0)}</p>
                       </div>
                     </div>
-                    <div className="mt-3 flex gap-2">
+                    <div className="mt-3 grid grid-cols-3 gap-2">
                       <button
                         type="button"
                         onClick={() => handleEdit(product)}
-                        className="flex-1 rounded-full bg-rose-900 px-3 py-2 text-xs font-semibold text-white"
+                        className="rounded-full bg-rose-900 px-2 py-2 text-xs font-semibold text-white"
                       >
                         Edit
                       </button>
                       <button
                         type="button"
+                        onClick={() => handleToggleBestSeller(product)}
+                        className="rounded-full border border-pink-300 bg-white px-2 py-2 text-xs font-semibold text-rose-900"
+                      >
+                        {isBestSellerProduct(product) ? "Remove best" : "Add best"}
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => handleDelete(product._id || product.id)}
-                        className="flex-1 rounded-full border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-900"
+                        className="rounded-full border border-rose-200 bg-white px-2 py-2 text-xs font-semibold text-rose-900"
                       >
                         Delete
                       </button>

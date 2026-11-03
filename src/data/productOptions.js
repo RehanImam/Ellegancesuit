@@ -24,6 +24,20 @@ export const PRODUCT_SIZES = [
   "6XL",
 ];
 
+const BEST_SELLER_NAME_PREFIX = "best-seller:";
+
+export const isBestSellerProduct = (product) =>
+  Boolean(product?.isBestSeller) ||
+  String(product?.productName || product?.name || "").toLowerCase().startsWith(BEST_SELLER_NAME_PREFIX);
+
+export const getProductDisplayName = (productName) =>
+  String(productName || "").replace(/^best-seller:/i, "");
+
+export const getStoredProductName = (productName, isBestSeller) => {
+  const displayName = getProductDisplayName(productName);
+  return isBestSeller ? `${BEST_SELLER_NAME_PREFIX}${displayName}` : displayName;
+};
+
 export const normalizeCategory = (category) => {
   const value = String(category || "").trim().toLowerCase();
 
