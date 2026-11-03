@@ -91,19 +91,19 @@ const Footer = () => {
 
               <li>
                 <Link
-                  to="/shop?category=Frocks"
+                  to="/shop?category=Choli%20collection"
                   className="text-pink-100/80 hover:text-[#F4A6B8] transition"
                 >
-                  Frocks
+                  Choli Collection
                 </Link>
               </li>
 
               <li>
                 <Link
-                  to="/shop?category=Suits"
+                  to="/shop?category=Suits%20collection"
                   className="text-pink-100/80 hover:text-[#F4A6B8] transition"
                 >
-                  Suits
+                  Suit Collection
                 </Link>
               </li>
 

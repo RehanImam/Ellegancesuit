@@ -1,23 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { CATEGORY_PRICES, normalizeCategory, PRODUCT_CATEGORIES, PRODUCT_SIZES } from "../data/productOptions";
 
 const API_BASE = "https://auth-backend-gules.vercel.app/api/v1";
 
 const emptyForm = {
   productName: "",
-  category: "Frocks",
-  price: "",
+  category: "Lehnga",
+  price: CATEGORY_PRICES.Lehnga,
   description: "",
   url: "",
-  images: ["", "", "", "", ""],
-  sizeStock: [
-    { size: "S", quantity: 0 },
-    { size: "M", quantity: 0 },
-    { size: "L", quantity: 0 },
-    { size: "XL", quantity: 0 },
-    { size: "XXL", quantity: 0 },
-  ],
+  images: [],
+  isBestSeller: false,
+  sizeStock: PRODUCT_SIZES.map((size) => ({ size, quantity: 0 })),
 };
 
 const Admin = () => {
@@ -53,8 +49,18 @@ const Admin = () => {
   }, [user, isAdmin]);
 
   const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { checked, name, type, value } = event.target;
+    setForm((prev) => {
+      if (name === "category") {
+        return {
+          ...prev,
+          category: value,
+          price: CATEGORY_PRICES[value],
+        };
+      }
+
+      return { ...prev, [name]: type === "checkbox" ? checked : value };
+    });
   };
 
   const uploadToCloudinary = async (file) => {
@@ -150,43 +156,16 @@ const Admin = () => {
     try {
       setLoading(true);
       const sourceFile = await compressImage(file);
-      setMessage("Uploading front image...");
+      setMessage("Uploading product image...");
       const uploadedUrl = await uploadToCloudinary(sourceFile);
       setForm((prev) => ({
         ...prev,
         url: uploadedUrl,
-        images: prev.images.map((item, index) => (index === 0 ? uploadedUrl : item)),
+        images: [uploadedUrl],
       }));
-      setMessage("Front image uploaded successfully.");
+      setMessage("Product image uploaded successfully.");
     } catch (error) {
       setMessage(error.message || "Front image upload failed");
-    } finally {
-      setLoading(false);
-      event.target.value = "";
-    }
-  };
-
-  const handleImageSlotUpload = async (index, event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setLoading(true);
-      const sourceFile = await compressImage(file);
-      setMessage(`Uploading image ${index + 1}...`);
-      const uploadedUrl = await uploadToCloudinary(sourceFile);
-      setForm((prev) => {
-        const nextImages = [...prev.images];
-        nextImages[index] = uploadedUrl;
-        return {
-          ...prev,
-          images: nextImages,
-          url: prev.url || uploadedUrl,
-        };
-      });
-      setMessage(`Image ${index + 1} uploaded successfully.`);
-    } catch (error) {
-      setMessage(error.message || `Image ${index + 1} upload failed`);
     } finally {
       setLoading(false);
       event.target.value = "";
@@ -208,12 +187,14 @@ const Admin = () => {
     setMessage("");
 
     try {
-      const imageList = [...form.images].map((item) => item.trim()).filter(Boolean).slice(0, 5);
+      const imageList = [...form.images].map((item) => item.trim()).filter(Boolean).slice(0, 1);
       const payload = {
         ...form,
+        productName: editingId ? form.productName : "",
         url: form.url || imageList[0] || "",
         images: imageList,
-        price: Number(form.price),
+        price: CATEGORY_PRICES[form.category],
+        originalPrice: 999,
         sizeStock: form.sizeStock.filter((item) => item.quantity > 0),
       };
 
@@ -248,25 +229,18 @@ const Admin = () => {
     setEditingId(product._id || product.id);
     setForm({
       productName: product.productName || product.name || "",
-      category: product.category || "Frocks",
-      price: product.price || "",
+      category: normalizeCategory(product.category),
+      price: CATEGORY_PRICES[normalizeCategory(product.category)],
       description: product.description || "",
       url: product.url || product.images?.[0] || "",
-      images: Array.isArray(product.images) && product.images.length > 0
-        ? [...product.images, ...Array(5).fill("")].slice(0, 5)
-        : [product.url || product.images?.[0] || "", "", "", "", ""],
+      images: [product.url || product.images?.[0] || ""].filter(Boolean),
+      isBestSeller: Boolean(product.isBestSeller),
       sizeStock: (product.sizeStock && product.sizeStock.length > 0)
-        ? ["S", "M", "L", "XL", "XXL"].map((size) => {
+        ? PRODUCT_SIZES.map((size) => {
             const match = product.sizeStock.find((item) => item.size === size);
             return { size, quantity: match ? Number(match.quantity) : 0 };
           })
-        : [
-            { size: "S", quantity: 0 },
-            { size: "M", quantity: 0 },
-            { size: "L", quantity: 0 },
-            { size: "XL", quantity: 0 },
-            { size: "XXL", quantity: 0 },
-          ],
+        : PRODUCT_SIZES.map((size) => ({ size, quantity: 0 })),
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -342,18 +316,6 @@ const Admin = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid gap-5 md:grid-cols-2">
                 <label className="block text-sm font-medium text-rose-900">
-                  Product Name
-                  <input
-                    type="text"
-                    name="productName"
-                    value={form.productName}
-                    onChange={handleInputChange}
-                    required
-                    className="mt-2 w-full rounded-xl border border-pink-200 bg-pink-50 px-3 py-3 outline-none focus:border-rose-800"
-                  />
-                </label>
-
-                <label className="block text-sm font-medium text-rose-900">
                   Category
                   <select
                     name="category"
@@ -361,23 +323,17 @@ const Admin = () => {
                     onChange={handleInputChange}
                     className="mt-2 w-full rounded-xl border border-pink-200 bg-pink-50 px-3 py-3 outline-none focus:border-rose-800"
                   >
-                    <option value="Frocks">Frocks</option>
-                    <option value="Suits">Suits</option>
-                    <option value="Accessories">Accessories</option>
+                    {PRODUCT_CATEGORIES.map((category) => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
                   </select>
                 </label>
 
                 <label className="block text-sm font-medium text-rose-900">
-                  Price
-                  <input
-                    type="number"
-                    name="price"
-                    min="0"
-                    value={form.price}
-                    onChange={handleInputChange}
-                    required
-                    className="mt-2 w-full rounded-xl border border-pink-200 bg-pink-50 px-3 py-3 outline-none focus:border-rose-800"
-                  />
+                  Price (category based)
+                  <p className="mt-2 rounded-xl border border-pink-200 bg-pink-50 px-3 py-3 text-rose-900">
+                    ₹{CATEGORY_PRICES[form.category]}
+                  </p>
                 </label>
               </div>
 
@@ -393,55 +349,31 @@ const Admin = () => {
                 />
               </label>
 
+              <label className="flex items-center gap-3 text-sm font-medium text-rose-900">
+                <input
+                  type="checkbox"
+                  name="isBestSeller"
+                  checked={form.isBestSeller}
+                  onChange={handleInputChange}
+                  className="h-4 w-4 accent-rose-900"
+                />
+                Show in Best Sellers
+              </label>
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-rose-700">Front Image</h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-rose-700">Product Image</h3>
                   <label className="cursor-pointer rounded-full bg-rose-900 px-4 py-2 text-xs font-semibold text-white">
-                    Upload front image
+                    Upload one image
                     <input type="file" accept="image/*" onChange={handleFrontImageUpload} className="hidden" />
                   </label>
                 </div>
 
                 {form.url && (
                   <div className="overflow-hidden rounded-2xl border border-pink-200 bg-pink-50 p-2">
-                    <img src={form.url} alt="Front product preview" className="h-32 w-full object-cover rounded-xl" />
+                    <img src={form.url} alt="Product preview" className="h-32 w-full object-cover rounded-xl" />
                   </div>
                 )}
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-rose-700">Images 1 to 5</h3>
-
-                <div className="grid gap-3 md:grid-cols-2">
-                  {form.images.map((image, index) => (
-                    <div key={`image-slot-${index}`} className="rounded-2xl border border-pink-200 bg-pink-50 p-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm font-medium text-rose-900">Image {index + 1}</span>
-                        <label className="cursor-pointer rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold text-rose-900 border border-pink-200">
-                          Upload
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(event) => handleImageSlotUpload(index, event)}
-                            className="hidden"
-                          />
-                        </label>
-                      </div>
-
-                      {image ? (
-  <img 
-    src={image} 
-    alt={`Product ${index + 1}`} 
-    className="mt-3 h-24 w-full object-cover rounded-xl border border-pink-200" 
-  />
-) : (
-  <div className="mt-3 flex h-24 items-center justify-center rounded-xl border border-dashed border-pink-300 text-xs text-pink-500">
-    No image selected
-  </div>
-)}
-                    </div>
-                  ))}
-                </div>
               </div>
 
               <div>
@@ -512,8 +444,8 @@ const Admin = () => {
                       />
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-semibold text-rose-950">{product.productName || product.name}</p>
-                        <p className="text-sm text-rose-700">{product.category}</p>
-                        <p className="text-sm text-rose-900">₹{Number(product.price || 0).toLocaleString()}</p>
+                                        <p className="text-sm text-rose-700">{normalizeCategory(product.category)}</p>
+                                        <p className="text-sm text-rose-900">₹{CATEGORY_PRICES[normalizeCategory(product.category)].toLocaleString()}</p>
                         <p className="text-xs text-rose-700">Stock: {Number(product.totalQuantity || 0)}</p>
                       </div>
                     </div>

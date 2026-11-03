@@ -7,6 +7,7 @@ import {
 } from "react";
 
 import { products as staticProducts } from "../data/products";
+import { CATEGORY_PRICES, normalizeCategory, PRODUCT_SIZES } from "../data/productOptions";
 
 const normalizeProduct = (product, fallbackId = Date.now()) => {
   const images = Array.isArray(product?.images) && product.images.length > 0
@@ -20,13 +21,14 @@ const normalizeProduct = (product, fallbackId = Date.now()) => {
     id: product?.id ?? product?._id ?? fallbackId,
     name: product?.name || product?.productName || "Untitled Product",
     productName: product?.productName || product?.name || "Untitled Product",
-    category: product?.category || "Frocks",
-    price: Number(product?.price || 0),
-    oldPrice: Number(product?.oldPrice || product?.price || 0),
+    category: normalizeCategory(product?.category),
+    price: CATEGORY_PRICES[normalizeCategory(product?.category)],
+    oldPrice: Number(product?.originalPrice || 999),
     rating: Number(product?.rating || 0),
     reviews: Number(product?.reviews || 0),
     description: product?.description || "",
-    sizes: product?.sizes || product?.sizeStock?.map((item) => item.size) || ["M", "L"],
+    sizes: PRODUCT_SIZES,
+    isBestSeller: Boolean(product?.isBestSeller),
     images: images.filter(Boolean),
     badge: product?.badge || "",
   };
@@ -40,7 +42,7 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem("ladies-fashion-cart");
 
-    return savedCart ? JSON.parse(savedCart) : [];
+    return savedCart ? JSON.parse(savedCart).map((product) => normalizeProduct(product)) : [];
   });
 
   const [wishlist, setWishlist] = useState(() => {
@@ -49,7 +51,7 @@ export const CartProvider = ({ children }) => {
     );
 
     return savedWishlist
-      ? JSON.parse(savedWishlist)
+      ? JSON.parse(savedWishlist).map((product) => normalizeProduct(product))
       : [];
   });
 

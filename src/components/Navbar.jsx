@@ -169,17 +169,17 @@ const Navbar = ({ onOpenCart }) => {
             </Link>
 
             <Link
-              to="/shop?category=Frocks"
+              to="/shop?category=Choli%20collection"
               className="hover:text-pink-600 transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-rose-900 hover:after:w-full after:transition-all"
             >
-              Frocks
+              Choli Collection
             </Link>
 
             <Link
-              to="/shop?category=Suits"
+              to="/shop?category=Suits%20collection"
               className="hover:text-pink-600 transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-rose-900 hover:after:w-full after:transition-all"
             >
-              Suits
+              Suit Collection
             </Link>
 
             <Link
@@ -520,18 +520,18 @@ const Navbar = ({ onOpenCart }) => {
 
               <Link
                 onClick={() => setMenuOpen(false)}
-                to="/shop?category=Frocks"
+                to="/shop?category=Choli%20collection"
                 className="px-3 py-2 rounded-lg hover:bg-pink-100/60 transition"
               >
-                Frocks
+                Choli Collection
               </Link>
 
               <Link
                 onClick={() => setMenuOpen(false)}
-                to="/shop?category=Suits"
+                to="/shop?category=Suits%20collection"
                 className="px-3 py-2 rounded-lg hover:bg-pink-100/60 transition"
               >
-                Suits
+                Suit Collection
               </Link>
 
               <Link

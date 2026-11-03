@@ -12,7 +12,7 @@ import ExploreColors from "./components/ExploreColors"; // Added import
 import AboutStory from "./components/AboutStory"; // Added import
 import ScrollToTop from "./components/ScrollToTop";
 import NewArrivals from "./components/NewArrivals";
-import VideoGallery from "./components/VideoGallery";
+// import VideoGallery from "./components/VideoGallery";
 
 
 import Home from "./pages/Home";
@@ -52,7 +52,7 @@ const MainLayout = () => {
                   <BestSellers />
                   <ExploreColors />
                   <NewArrivals />
-                  <VideoGallery />
+                  {/* <VideoGallery /> */}
                   <AboutStory />
                 </>
               }

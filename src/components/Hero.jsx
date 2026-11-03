@@ -46,7 +46,7 @@ const Hero = () => {
               </Link>
 
               <Link
-                to="/shop?category=Suits"
+                to="/shop?category=Suits%20collection"
                 className="px-6 py-3.5 sm:px-7 sm:py-4 text-xs sm:text-sm rounded-full border border-maroon-200 text-maroon-800 hover:bg-white transition"
               >
                 Explore Suits

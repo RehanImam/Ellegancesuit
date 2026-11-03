@@ -2,18 +2,18 @@
 
 import { Link } from "react-router-dom";
 
-import imageTwo from "../assets/imagetwo.jpeg";
+import imageOne from "../assets/imageone.jpeg";
 import imageFour from "../assets/imagefour.jpeg";
 
 const categories = [
   {
-    name: "Elegant Frocks",
-    category: "Frocks",
-    image: imageTwo,
+    name: "Sari Collection",
+    category: "Sari collection",
+    image: imageOne,
   },
   {
-    name: "Royal Suits",
-    category: "Suits",
+    name: "Suit Collection",
+    category: "Suits collection",
     image: imageFour,
   },
 ];

@@ -14,14 +14,14 @@ import imageFour from "../assets/imagefour.jpeg";
 
 const categoryList = [
   { name: "ALL", category: "All", image: imageOne },
-  { name: "SHARARA SUIT", category: "Sharara Suit", image: imageTwo },
-  { name: "GARARA SUIT", category: "Garara Suit", image: imageThree },
-  { name: "PANT SUIT", category: "Pant Suit", image: imageFour },
-  { name: "FARSHI SHALWAR", category: "Farshi Shalwar Suit", image: imageOne },
-  { name: "FROCK SUIT", category: "Frock Suit", image: imageTwo },
-  { name: "GOWN", category: "Gown", image: imageThree },
-  { name: "LEHNGA", category: "Lehnga", image: imageFour },
-  { name: "PLAZO SUIT", category: "Plazo Suit", image: imageOne },
+  { name: "LEHNGA", category: "Lehnga", image: imageTwo },
+  { name: "CHOLI COLLECTION", category: "Choli collection", image: imageThree },
+  { name: "SUIT COLLECTION", category: "Suits collection", image: imageFour },
+  { name: "SARI COLLECTION", category: "Sari collection", image: imageOne },
+  // { name: "FROCK SUIT", category: "Frock Suit", image: imageTwo },
+  // { name: "GOWN", category: "Gown", image: imageThree },
+  // { name: "LEHNGA", category: "Lehnga", image: imageFour },
+  // { name: "PLAZO SUIT", category: "Plazo Suit", image: imageOne },
 ];
 
 const Home = () => {
