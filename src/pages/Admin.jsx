@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import { CATEGORY_PRICES, normalizeCategory, PRODUCT_CATEGORIES } from "../data/productOptions";
 
 const API_BASE = "https://auth-backend-gules.vercel.app/api/v1";
@@ -12,13 +13,26 @@ const emptyForm = {
   isBestSeller: false,
 };
 
+const uploadImageBatch = async (files, startIndex, compressImage, uploadToCloudinary) =>
+  Promise.all(files.map(async (imageFile, batchIndex) => {
+    const index = startIndex + batchIndex;
+    try {
+      const file = await compressImage(imageFile);
+      return { index, url: await uploadToCloudinary(file) };
+    } catch (error) {
+      return { index, error: `Image ${index + 1}: ${error.message}` };
+    }
+  }));
+
 const Admin = () => {
   const navigate = useNavigate();
   const { user, isAdmin, authLoading } = useAuth();
+  const { refreshProducts } = useCart();
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [activeUpload, setActiveUpload] = useState("");
   const [message, setMessage] = useState("");
   const [categoryUpload, setCategoryUpload] = useState({
     category: "Lehnga",
@@ -183,45 +197,38 @@ const Admin = () => {
       setMessage("");
       setUpload((prev) => ({ ...prev, files }));
     }
-    event.target.value = "";
   };
 
-  const handleBulkUpload = async (upload, setUpload, isBestSeller) => {
+  const handleBulkUpload = async (uploadType, upload, setUpload, isBestSeller) => {
     if (upload.files.length === 0) {
       setMessage("Please select at least one product image.");
       return;
     }
 
     setLoading(true);
+    setActiveUpload(uploadType);
     setMessage("");
     setUpload((prev) => ({ ...prev, progress: `Preparing ${upload.files.length} images...` }));
 
     try {
       const uploadedUrls = Array(upload.files.length);
       const uploadErrors = [];
-      let nextIndex = 0;
       let completed = 0;
 
-      const uploadWorker = async () => {
-        while (nextIndex < upload.files.length) {
-          const index = nextIndex;
-          nextIndex += 1;
-          try {
-            const file = await compressImage(upload.files[index]);
-            uploadedUrls[index] = await uploadToCloudinary(file);
-          } catch (error) {
-            uploadErrors.push(`Image ${index + 1}: ${error.message}`);
-          } finally {
-            completed += 1;
-            const progress = `Uploading images: ${completed} of ${upload.files.length}`;
-            setUpload({ ...upload, progress });
+      for (let start = 0; start < upload.files.length; start += 3) {
+        const batch = upload.files.slice(start, start + 3);
+        const batchResults = await uploadImageBatch(batch, start, compressImage, uploadToCloudinary);
+        for (const result of batchResults) {
+          if (result.error) {
+            uploadErrors.push(result.error);
+          } else {
+            uploadedUrls[result.index] = result.url;
           }
         }
-      };
-
-      await Promise.all(
-        Array.from({ length: Math.min(3, upload.files.length) }, () => uploadWorker())
-      );
+        completed += batch.length;
+        const progress = `Uploading images: ${completed} of ${upload.files.length}`;
+        setUpload({ ...upload, progress });
+      }
 
       if (uploadErrors.length > 0) {
         throw new Error(`${uploadErrors.length} image(s) could not be uploaded. ${uploadErrors[0]}`);
@@ -248,10 +255,12 @@ const Admin = () => {
       setMessage(`${result.data.length} ${upload.category} products added${isBestSeller ? " to Best Sellers" : ""}.`);
       setUpload((prev) => ({ ...prev, files: [], progress: "" }));
       await fetchProducts();
+      await refreshProducts();
     } catch (error) {
       setMessage(error.message || "Bulk image upload failed.");
       setUpload((prev) => ({ ...prev, progress: "" }));
     } finally {
+      setActiveUpload("");
       setLoading(false);
     }
   };
@@ -288,7 +297,7 @@ const Admin = () => {
       setMessage("Product updated successfully.");
       setForm(emptyForm);
       setEditingId(null);
-      fetchProducts();
+      await Promise.all([fetchProducts(), refreshProducts()]);
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -321,13 +330,15 @@ const Admin = () => {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "Delete failed");
       setMessage("Product deleted successfully.");
-      fetchProducts();
+      await Promise.all([fetchProducts(), refreshProducts()]);
     } catch (error) {
       setMessage(error.message);
     }
   };
 
-  const renderBulkUploader = (title, upload, setUpload, isBestSeller) => (
+  const renderBulkUploader = (title, uploadType, upload, setUpload, isBestSeller) => {
+    const isUploading = activeUpload === uploadType;
+    return (
     <div className="rounded-3xl border border-pink-200 bg-white p-6 shadow-sm">
       <h2 className="text-xl font-bold text-rose-950">{title}</h2>
       <p className="mt-1 text-sm text-rose-700">
@@ -358,7 +369,7 @@ const Admin = () => {
           type="file"
           accept="image/*"
           multiple
-          disabled={loading}
+          disabled={Boolean(activeUpload)}
           onChange={(event) => handleBulkFilesChange(event, setUpload)}
           className="mt-2 block w-full rounded-xl border border-pink-200 bg-pink-50 p-3 text-sm"
         />
@@ -373,14 +384,15 @@ const Admin = () => {
 
       <button
         type="button"
-        onClick={() => handleBulkUpload(upload, setUpload, isBestSeller)}
-        disabled={loading || upload.files.length === 0}
+        onClick={() => handleBulkUpload(uploadType, upload, setUpload, isBestSeller)}
+        disabled={Boolean(activeUpload) || upload.files.length === 0}
         className="mt-4 rounded-full bg-rose-900 px-6 py-3 text-sm font-semibold text-white hover:bg-rose-800 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {loading ? "Uploading..." : `Upload ${upload.files.length || ""} Products`}
+        {isUploading ? "Uploading..." : `Upload ${upload.files.length || ""} Products`}
       </button>
     </div>
-  );
+    );
+  };
 
   const productSummary = useMemo(() => {
     const totalInventory = products.reduce((sum, product) => sum + (Number(product.totalQuantity) || 0), 0);
@@ -500,8 +512,8 @@ const Admin = () => {
           </div>
         ) : (
           <div className="grid gap-6 lg:grid-cols-2">
-            {renderBulkUploader("Upload Products by Category", categoryUpload, setCategoryUpload, false)}
-            {renderBulkUploader("Upload Best Sellers", bestSellerUpload, setBestSellerUpload, true)}
+            {renderBulkUploader("Upload Products by Category", "category", categoryUpload, setCategoryUpload, false)}
+            {renderBulkUploader("Upload Best Sellers", "bestSeller", bestSellerUpload, setBestSellerUpload, true)}
           </div>
         )}
 

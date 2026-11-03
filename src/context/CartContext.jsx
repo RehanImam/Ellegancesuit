@@ -1,6 +1,7 @@
 import {
   createContext,
   useContext,
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -57,21 +58,22 @@ export const CartProvider = ({ children }) => {
 
   const [dbProducts, setDbProducts] = useState([]);
 
-  useEffect(() => {
-    const fetchDbProducts = async () => {
-      try {
-        const response = await fetch("https://auth-backend-gules.vercel.app/api/v1/products");
-        const payload = await response.json();
-        if (!response.ok) return;
-        const nextProducts = Array.isArray(payload.data) ? payload.data : [];
-        setDbProducts(nextProducts.map((product) => normalizeProduct(product, product._id || product.id)));
-      } catch (error) {
-        console.error("Failed to load DB products", error);
-      }
-    };
+  const refreshProducts = useCallback(async () => {
+    const response = await fetch("https://auth-backend-gules.vercel.app/api/v1/products");
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload.message || "Failed to load products");
+    }
 
-    fetchDbProducts();
+    const nextProducts = Array.isArray(payload.data) ? payload.data : [];
+    setDbProducts(nextProducts.map((product) => normalizeProduct(product, product._id || product.id)));
   }, []);
+
+  useEffect(() => {
+    refreshProducts().catch((error) => {
+      console.error("Failed to load DB products", error);
+    });
+  }, [refreshProducts]);
 
   useEffect(() => {
     localStorage.setItem(
@@ -241,6 +243,7 @@ export const CartProvider = ({ children }) => {
         cart,
         wishlist,
         mergedProducts,
+        refreshProducts,
         addToCart,
         removeFromCart,
         increaseQuantity,
