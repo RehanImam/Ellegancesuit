@@ -183,7 +183,7 @@ const Navbar = ({ onOpenCart }) => {
             </Link>
 
             <Link
-              to="/#about"
+              to="/about"
               className="hover:text-pink-600 transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-rose-900 hover:after:w-full after:transition-all"
             >
               About
@@ -532,6 +532,14 @@ const Navbar = ({ onOpenCart }) => {
                 className="px-3 py-2 rounded-lg hover:bg-pink-100/60 transition"
               >
                 Suit Collection
+              </Link>
+
+              <Link
+                onClick={() => setMenuOpen(false)}
+                to="/about"
+                className="px-3 py-2 rounded-lg hover:bg-pink-100/60 transition"
+              >
+                About
               </Link>
 
               <Link

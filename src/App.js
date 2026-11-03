@@ -64,6 +64,11 @@ const MainLayout = () => {
           />
 
           <Route
+            path="/about"
+            element={<AboutStory />}
+          />
+
+          <Route
             path="/product/:id"
             element={<ProductDetails />}
           />
