@@ -207,9 +207,9 @@ const Footer = () => {
                   className="text-[#F4A6B8] shrink-0"
                 />
 
-                <span className="text-pink-100/80">
+                {/* <span className="text-pink-100/80">
                   +91 98765 43210
-                </span>
+                </span> */}
               </div>
 
               {/* Email */}
