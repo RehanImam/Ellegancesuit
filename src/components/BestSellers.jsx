@@ -1,11 +1,12 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Heart, ShoppingBag } from "lucide-react";
+import { products } from "../data/products";
 import { useCart } from "../context/CartContext";
 
 const BestSellers = () => {
   const scrollRef = useRef(null);
-  const { toggleWishlist, isWishlisted, addToCart, mergedProducts } = useCart();
+  const { toggleWishlist, isWishlisted, addToCart } = useCart();
 
   // Horizontal Scroll Controls
   const scroll = (direction) => {
@@ -44,7 +45,7 @@ const BestSellers = () => {
             className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide scroll-smooth py-2 px-1"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {mergedProducts.map((product) => {
+            {products.map((product) => {
               const inWishlist = isWishlisted(product.id);
 
               return (

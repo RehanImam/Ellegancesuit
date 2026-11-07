@@ -11,6 +11,7 @@ import {
 
 } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { products } from "../data/products";
 import { useCart } from "../context/CartContext";
 
 const categories = ["All", "Frocks", "Suits"];
@@ -27,7 +28,7 @@ const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl);
   const [sort, setSort] = useState("featured");
 
-  const { toggleWishlist, isWishlisted, addToCart, mergedProducts } = useCart();
+  const { toggleWishlist, isWishlisted, addToCart } = useCart();
 
   // Sync state when URL params change
   useEffect(() => {
@@ -78,7 +79,7 @@ const Shop = () => {
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
-    let result = [...mergedProducts];
+    let result = [...products];
 
     // Filter by category
     if (selectedCategory && selectedCategory !== "All") {
