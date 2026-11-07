@@ -12,6 +12,7 @@ import {
   Truck,
 } from "lucide-react";
 import { useAddress } from "../context/AddressContext";
+import { getProductDisplayName } from "../data/productOptions";
 
 
 const OrderSuccess = () => {
@@ -336,7 +337,7 @@ const OrderSuccess = () => {
                   />
                   <div>
                     <h4 className="font-serif text-sm sm:text-base font-bold text-maroon-950">
-                      {item.name}
+                      {getProductDisplayName(item.name)}
                     </h4>
                     <p className="text-xs text-gray-500 mt-1">
                       Size: <span className="font-semibold text-maroon-900">{item.size}</span> · Quantity: <span className="font-semibold text-maroon-900">{item.quantity}</span>

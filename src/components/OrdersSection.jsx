@@ -8,6 +8,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { getProductDisplayName } from "../data/productOptions";
 
 const OrdersSection = ({ activeTab, setActiveTab }) => {
   const { getOrderHistory, cancelOrder } = useAuth();
@@ -205,7 +206,7 @@ const OrdersSection = ({ activeTab, setActiveTab }) => {
                         >
                           <div className="flex-1">
                             <p className="font-medium text-gray-900">
-                              {item.productName}
+                              {getProductDisplayName(item.productName)}
                             </p>
                             <p className="text-gray-600">
                               Size: {item.size} • Qty: {item.quantity}

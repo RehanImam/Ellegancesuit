@@ -11,17 +11,16 @@ import imageOne from "../assets/imageone.jpeg";
 import imageTwo from "../assets/imagetwo.jpeg";
 import imageThree from "../assets/imagethree.jpeg";
 import imageFour from "../assets/imagefour.jpeg";
+import { PRODUCT_CATEGORIES } from "../data/productOptions";
 
+const categoryImages = [imageFour, imageOne, imageTwo, imageThree, imageFour];
 const categoryList = [
   { name: "ALL", category: "All", image: imageOne },
-  { name: "SHARARA SUIT", category: "Sharara Suit", image: imageTwo },
-  { name: "GARARA SUIT", category: "Garara Suit", image: imageThree },
-  { name: "PANT SUIT", category: "Pant Suit", image: imageFour },
-  { name: "FARSHI SHALWAR", category: "Farshi Shalwar Suit", image: imageOne },
-  { name: "FROCK SUIT", category: "Frock Suit", image: imageTwo },
-  { name: "GOWN", category: "Gown", image: imageThree },
-  { name: "LEHNGA", category: "Lehnga", image: imageFour },
-  { name: "PLAZO SUIT", category: "Plazo Suit", image: imageOne },
+  ...PRODUCT_CATEGORIES.map((category, index) => ({
+    name: category.toUpperCase(),
+    category,
+    image: categoryImages[index],
+  })),
 ];
 
 const Home = () => {

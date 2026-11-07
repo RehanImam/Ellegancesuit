@@ -154,9 +154,11 @@ const ProductDetails = () => {
               </span>
             </div>
 
-            <p className="text-gray-600 leading-7 mt-6">
-              {product.description}
-            </p>
+            {product.description && (
+              <p className="text-gray-600 leading-7 mt-6">
+                {product.description}
+              </p>
+            )}
 
             <div className="h-px bg-pink-100 my-7" />
 
@@ -164,7 +166,7 @@ const ProductDetails = () => {
             <div>
               <div className="flex justify-between mb-3">
                 <span className="font-semibold text-maroon-900">
-                  Select Size
+                  Select Size (S to 6XL)
                 </span>
 
                 <button className="text-sm text-maroon-700 underline">

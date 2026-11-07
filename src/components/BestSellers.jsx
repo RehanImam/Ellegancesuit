@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Heart, ShoppingBag } from "lucide-react";
 import { products } from "../data/products";
 import { useCart } from "../context/CartContext";
+import { isBestSellerProduct } from "../data/productOptions";
 
 const BestSellers = () => {
   const scrollRef = useRef(null);
@@ -45,7 +46,7 @@ const BestSellers = () => {
             className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide scroll-smooth py-2 px-1"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {products.map((product) => {
+            {mergedProducts.filter(isBestSellerProduct).map((product) => {
               const inWishlist = isWishlisted(product.id);
 
               return (
@@ -89,6 +90,7 @@ const BestSellers = () => {
                       <h3 className="text-sm font-serif text-gray-900 font-medium truncate group-hover/card:text-[#4a0e17]">
                         {product.name}
                       </h3>
+                      <p className="mt-1 text-xs text-gray-500">Sizes: S to 6XL</p>
                       <div className="flex items-center gap-2 mt-1">
                         <p className="text-[#4a0e17] font-bold text-sm">
                           ₹{product.price.toLocaleString()}

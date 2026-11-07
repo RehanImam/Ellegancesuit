@@ -1,12 +1,19 @@
 import {
   createContext,
   useContext,
+  useCallback,
   useEffect,
   useMemo,
   useState,
 } from "react";
 
 import { products as staticProducts } from "../data/products";
+import {
+  getProductDisplayName,
+  isBestSellerProduct,
+  normalizeCategory,
+  PRODUCT_SIZES,
+} from "../data/productOptions";
 
 const normalizeProduct = (product, fallbackId = Date.now()) => {
   const images = Array.isArray(product?.images) && product.images.length > 0
@@ -18,15 +25,16 @@ const normalizeProduct = (product, fallbackId = Date.now()) => {
   return {
     ...product,
     id: product?.id ?? product?._id ?? fallbackId,
-    name: product?.name || product?.productName || "Untitled Product",
+    name: getProductDisplayName(product?.name || product?.productName) || "Untitled Product",
     productName: product?.productName || product?.name || "Untitled Product",
-    category: product?.category || "Frocks",
-    price: Number(product?.price || 0),
-    oldPrice: Number(product?.oldPrice || product?.price || 0),
+    category: normalizeCategory(product?.category),
+    price: Number(product?.price ?? 0),
+    oldPrice: Number(product?.originalPrice || 999),
     rating: Number(product?.rating || 0),
     reviews: Number(product?.reviews || 0),
     description: product?.description || "",
-    sizes: product?.sizes || product?.sizeStock?.map((item) => item.size) || ["M", "L"],
+    sizes: PRODUCT_SIZES,
+    isBestSeller: isBestSellerProduct(product),
     images: images.filter(Boolean),
     badge: product?.badge || "",
   };
@@ -40,7 +48,7 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem("ladies-fashion-cart");
 
-    return savedCart ? JSON.parse(savedCart) : [];
+    return savedCart ? JSON.parse(savedCart).map((product) => normalizeProduct(product)) : [];
   });
 
   const [wishlist, setWishlist] = useState(() => {
@@ -49,27 +57,28 @@ export const CartProvider = ({ children }) => {
     );
 
     return savedWishlist
-      ? JSON.parse(savedWishlist)
+      ? JSON.parse(savedWishlist).map((product) => normalizeProduct(product))
       : [];
   });
 
   const [dbProducts, setDbProducts] = useState([]);
 
-  useEffect(() => {
-    const fetchDbProducts = async () => {
-      try {
-        const response = await fetch("https://auth-backend-gules.vercel.app/api/v1/products");
-        const payload = await response.json();
-        if (!response.ok) return;
-        const nextProducts = Array.isArray(payload.data) ? payload.data : [];
-        setDbProducts(nextProducts.map((product) => normalizeProduct(product, product._id || product.id)));
-      } catch (error) {
-        console.error("Failed to load DB products", error);
-      }
-    };
+  const refreshProducts = useCallback(async () => {
+    const response = await fetch("https://auth-backend-gules.vercel.app/api/v1/products");
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload.message || "Failed to load products");
+    }
 
-    fetchDbProducts();
+    const nextProducts = Array.isArray(payload.data) ? payload.data : [];
+    setDbProducts(nextProducts.map((product) => normalizeProduct(product, product._id || product.id)));
   }, []);
+
+  useEffect(() => {
+    refreshProducts().catch((error) => {
+      console.error("Failed to load DB products", error);
+    });
+  }, [refreshProducts]);
 
   useEffect(() => {
     localStorage.setItem(
@@ -238,6 +247,8 @@ export const CartProvider = ({ children }) => {
       value={{
         cart,
         wishlist,
+        mergedProducts,
+        refreshProducts,
         addToCart,
         removeFromCart,
         increaseQuantity,

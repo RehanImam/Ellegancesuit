@@ -130,16 +130,16 @@ const Navbar = ({ onOpenCart }) => {
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-pink-300 shadow-sm transition-transform duration-300 group-hover:scale-105 shrink-0">
               <img
                 src={logoImg}
-                alt="Jannat Elegance Logo"
+                alt="Vastra official Logo"
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="flex flex-col">
               <span className="font-serif text-xl sm:text-2xl font-bold tracking-wide text-rose-950 group-hover:text-rose-800 transition">
-                JANNAT
+                VASTRA
               </span>
               <span className="text-[9px] tracking-[3px] font-medium text-pink-600 uppercase -mt-1">
-                Elegance
+                OFFICAIL
               </span>
             </div>
           </Link>
@@ -161,21 +161,21 @@ const Navbar = ({ onOpenCart }) => {
             </Link>
 
             <Link
-              to="/shop?category=Frocks"
+              to="/shop?category=Saree"
               className="hover:text-pink-600 transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-rose-900 hover:after:w-full after:transition-all"
             >
-              Frocks
+              Saree
             </Link>
 
             <Link
-              to="/shop?category=Suits"
+              to="/shop?category=Suit"
               className="hover:text-pink-600 transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-rose-900 hover:after:w-full after:transition-all"
             >
-              Suits
+              Suit
             </Link>
 
             <Link
-              href="#about"
+              to="/about"
               className="hover:text-pink-600 transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-rose-900 hover:after:w-full after:transition-all"
             >
               About
@@ -244,7 +244,7 @@ const Navbar = ({ onOpenCart }) => {
                     <div>
                       <div className="text-center pb-3 mb-3 border-b border-pink-100">
                         <h4 className="font-serif text-lg font-bold text-rose-950">
-                          Welcome to Jannat
+                          Welcome to VASTRA OFFICIAL
                         </h4>
                         <p className="text-xs text-rose-700/80 mt-0.5">
                           Access your orders & wishlist
@@ -502,18 +502,26 @@ const Navbar = ({ onOpenCart }) => {
 
               <Link
                 onClick={() => setMenuOpen(false)}
-                to="/shop?category=Frocks"
+                to="/shop?category=Kurti"
                 className="px-3 py-2 rounded-lg hover:bg-pink-100/60 transition"
               >
-                Frocks
+                Kurti
               </Link>
 
               <Link
                 onClick={() => setMenuOpen(false)}
-                to="/shop?category=Suits"
+                to="/shop?category=Sharara"
                 className="px-3 py-2 rounded-lg hover:bg-pink-100/60 transition"
               >
-                Suits
+                Sharara
+              </Link>
+
+              <Link
+                onClick={() => setMenuOpen(false)}
+                to="/about"
+                className="px-3 py-2 rounded-lg hover:bg-pink-100/60 transition"
+              >
+                About
               </Link>
 
               <Link

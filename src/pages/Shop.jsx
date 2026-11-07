@@ -13,8 +13,7 @@ import {
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { products } from "../data/products";
 import { useCart } from "../context/CartContext";
-
-const categories = ["All", "Frocks", "Suits"];
+import { normalizeCategory, SHOP_CATEGORIES } from "../data/productOptions";
 
 const Shop = () => {
   const navigate = useNavigate();
@@ -54,11 +53,6 @@ const Shop = () => {
     setSearchParams(params);
   };
 
-  const handleCategoryClick = (cat) => {
-    setSelectedCategory(cat);
-    updateFilters(undefined, cat);
-  };
-
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     updateFilters(searchTerm, undefined);
@@ -83,15 +77,8 @@ const Shop = () => {
 
     // Filter by category
     if (selectedCategory && selectedCategory !== "All") {
-      const catLower = selectedCategory.toLowerCase().replace(/s$/, ""); // e.g. "suits" -> "suit", "frocks" -> "frock"
-      result = result.filter((p) => {
-        const prodCatLower = p.category?.toLowerCase() || "";
-        const prodNameLower = p.name?.toLowerCase() || "";
-        return (
-          prodCatLower.includes(catLower) ||
-          prodNameLower.includes(catLower)
-        );
-      });
+      const requestedCategory = normalizeCategory(selectedCategory);
+      result = result.filter((product) => normalizeCategory(product.category) === requestedCategory);
     }
 
     // Filter by search term
@@ -116,7 +103,7 @@ const Shop = () => {
     }
 
     return result;
-  }, [searchTerm, selectedCategory, sort]);
+  }, [mergedProducts,searchTerm, selectedCategory, sort]);
 
   return (
     <main className="bg-[#fff8fa] min-h-screen py-8">
@@ -183,34 +170,23 @@ const Shop = () => {
           </div>
         </div>
 
-        {/* Category Filter Chips */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide mb-6">
-          <span className="text-xs font-semibold uppercase tracking-wider text-rose-950/70 mr-1 flex items-center gap-1 shrink-0">
-            
-            Categories:
-          </span>
-          {categories.map((cat) => {
-            const isSelected =
-              selectedCategory.toLowerCase() === cat.toLowerCase() ||
-              (cat === "All" && (!selectedCategory || selectedCategory === "All"));
-
-            return (
-              <button
-                key={cat}
-                onClick={() => handleCategoryClick(cat)}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all border shrink-0 ${
-                  isSelected
-                    ? "bg-[#4a0e17] text-white border-[#4a0e17] shadow-sm"
-                    : "bg-white text-[#4a0e17] border-pink-200 hover:border-[#4a0e17]"
-                }`}
-              >
-                {cat}
-              </button>
-            );
-          })}
+        <div className="mb-6 flex flex-wrap gap-2" aria-label="Filter by category">
+          {SHOP_CATEGORIES.map((category) => (
+            <button
+              key={category}
+              type="button"
+              onClick={() => updateFilters(undefined, category)}
+              aria-pressed={selectedCategory === category}
+              className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
+                selectedCategory === category
+                  ? "border-rose-900 bg-rose-900 text-white"
+                  : "border-pink-200 bg-white text-rose-900 hover:border-rose-900"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
         </div>
-
-        
 
         {/* Results Count */}
         <div className="flex items-center justify-between mb-4">
@@ -279,6 +255,7 @@ const Shop = () => {
                           {product.name}
                         </h3>
                       </Link>
+                      <p className="mt-1 text-[11px] text-gray-500">Sizes: S to 6XL</p>
                       <div className="flex items-center gap-2 mt-1">
                         <p className="text-[#4a0e17] font-bold text-sm sm:text-base">
                           ₹{product.price.toLocaleString()}

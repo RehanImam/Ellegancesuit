@@ -10,11 +10,11 @@ const Footer = () => {
           {/* ================= BRAND ================= */}
           <div>
             <h2 className="font-serif text-3xl tracking-wide text-white">
-              JANNAT 
+              VASTRA 
             </h2>
 
             <p className="text-[#F4A6B8] text-xs tracking-[5px] mt-2">
-              JANNAT ELENGANCE
+              VASTRA OFFICAIL
             </p>
 
             <p className="text-pink-100/80 leading-7 mt-6 max-w-sm">
@@ -91,19 +91,19 @@ const Footer = () => {
 
               <li>
                 <Link
-                  to="/shop?category=Frocks"
+                  to="/shop?category=Kurti"
                   className="text-pink-100/80 hover:text-[#F4A6B8] transition"
                 >
-                  Frocks
+                  Kurti
                 </Link>
               </li>
 
               <li>
                 <Link
-                  to="/shop?category=Suits"
+                  to="/shop?category=Lehenga"
                   className="text-pink-100/80 hover:text-[#F4A6B8] transition"
                 >
-                  Suits
+                  Lehenga
                 </Link>
               </li>
 
@@ -207,9 +207,9 @@ const Footer = () => {
                   className="text-[#F4A6B8] shrink-0"
                 />
 
-                <span className="text-pink-100/80">
+                {/* <span className="text-pink-100/80">
                   +91 98765 43210
-                </span>
+                </span> */}
               </div>
 
               {/* Email */}
@@ -220,7 +220,7 @@ const Footer = () => {
                 />
 
                 <span className="text-pink-100/80">
-                  hello@JANNAT ELENGANCE.com
+                  hello@Vastra officialcom
                 </span>
               </div>
             </div>
