@@ -50,7 +50,7 @@ const Signup = () => {
           <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-pink-300 shadow-sm mx-auto mb-3">
             <img
               src={logoImg}
-              alt="Shanaya collection"
+              alt="Vastra official"
               className="w-full h-full object-cover"
             />
           </div>
@@ -58,7 +58,7 @@ const Signup = () => {
             Create Account
           </h2>
           <p className="text-xs tracking-[2px] font-medium text-pink-600 uppercase mt-1">
-            Join Shanaya collection
+            Join Vastra official
           </p>
         </div>
 

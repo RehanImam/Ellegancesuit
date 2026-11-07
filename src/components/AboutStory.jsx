@@ -39,7 +39,7 @@ const AboutStory = () => (
           </h1>
 
           <p className="mt-7 max-w-xl text-sm leading-7 text-[#71525a] sm:text-base sm:leading-8">
-            Shanaya Collection celebrates the beauty of dressing up and the
+            Vastra official celebrates the beauty of dressing up and the
             confidence that comes with feeling truly yourself. We bring together
             the spirit of Indian style and a graceful, modern touch—so every
             occasion can feel a little more special.
@@ -74,7 +74,7 @@ const AboutStory = () => (
             <div className="h-full overflow-hidden rounded-[10rem_10rem_1.5rem_1.5rem] bg-[#ead9d8]">
               <img
                 src={storyImage}
-                alt="A look from the Shanaya Collection"
+                alt="A look from the Vastra official"
                 className="h-full w-full object-cover object-top transition duration-1000 group-hover:scale-105"
               />
               <div className="absolute inset-2.5 rounded-[10rem_10rem_1.5rem_1.5rem] bg-gradient-to-t from-[#38101f]/45 via-transparent to-white/10" />
@@ -102,14 +102,14 @@ const AboutStory = () => (
       <div className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-2xl text-center">
           <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#a44d60]">
-            The Shanaya feeling
+            The Vastra  feeling
           </span>
           <h2 className="mt-4 font-serif text-3xl leading-tight text-[#481d27] sm:text-5xl">
             Style that celebrates <span className="italic text-[#a44d60]">you.</span>
           </h2>
           <p className="mt-5 text-sm leading-7 text-[#80636a] sm:text-base">
             We believe what you wear should feel as lovely as the memory you are
-            making. That is the thought behind every collection at Shanaya.
+            making. That is the thought behind every collection at Vastra .
           </p>
         </div>
 
@@ -142,7 +142,7 @@ const AboutStory = () => (
           <span className="block italic text-rose-200">Own your moment.”</span>
         </p>
         <p className="mx-auto mt-6 max-w-xl text-sm leading-7 text-rose-100/80 sm:text-base">
-          Thank you for making Shanaya Collection part of your story. We are
+          Thank you for making Vastra official part of your story. We are
           here to help you find something that feels beautiful, meaningful and
           unmistakably yours.
         </p>

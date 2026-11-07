@@ -13,7 +13,7 @@ export const products = [
   {
     id: 1,
     name: "Rose Embroidered Anarkali Frock",
-    category: "Frocks",
+    category: "Kurti",
     price:  699,
     oldPrice: 1299,
     rating: 4.8,
@@ -37,7 +37,7 @@ export const products = [
   {
     id: 2,
     name: "Royal Maroon Party Frock",
-    category: "Frocks",
+    category: "Kurti",
     price: 699,
     oldPrice: 999,
     rating: 4.9,
@@ -61,7 +61,7 @@ export const products = [
   {
     id: 3,
     name: "Blush Pink Pakistani Suit",
-    category: "Suits",
+    category: "Suit",
     price: 699,
     oldPrice: 1499,
     rating: 4.7,
@@ -85,7 +85,7 @@ export const products = [
   {
     id: 4,
     name: "Maroon Velvet Festive Suit",
-    category: "Suits",
+    category: "Suit",
     price: 699,
     oldPrice: 999,
     rating: 4.9,
@@ -109,7 +109,7 @@ export const products = [
   {
     id: 5,
     name: "Elegant Rose Sharara Suit",
-    category: "Suits",
+    category: "Sharara",
     price: 699,
     oldPrice: 999,
     rating: 4.8,
@@ -133,7 +133,7 @@ export const products = [
   {
     id: 6,
     name: "Pink Floral Designer Frock",
-    category: "Frocks",
+    category: "Kurti",
     price: 699,
     oldPrice: 999,
     rating: 4.6,

@@ -1,21 +1,14 @@
 
 
 import { Link } from "react-router-dom";
+import { PRODUCT_CATEGORIES } from "../data/productOptions";
 
 import imageOne from "../assets/imageone.jpeg";
 import imageFour from "../assets/imagefour.jpeg";
 
 const categories = [
-  {
-    name: "Sari Collection",
-    category: "Sari collection",
-    image: imageOne,
-  },
-  {
-    name: "Suit Collection",
-    category: "Suits collection",
-    image: imageFour,
-  },
+  { name: "Suit", category: PRODUCT_CATEGORIES[0], image: imageFour },
+  { name: "Saree", category: PRODUCT_CATEGORIES[1], image: imageOne },
 ];
 
 const CategorySection = () => {
@@ -34,11 +27,11 @@ const CategorySection = () => {
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {categories.map((item) => (
             <Link
               key={item.category}
-              to={`/shop?category=${item.category}`}
+              to={`/shop?category=${encodeURIComponent(item.category)}`}
               className="
                 relative
                 group

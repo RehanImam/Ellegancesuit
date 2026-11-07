@@ -1,16 +1,12 @@
 export const PRODUCT_CATEGORIES = [
-  "Lehnga",
-  "Choli collection",
-  "Suits collection",
-  "Sari collection",
+  "Suit",
+  "Saree",
+  "Lehenga",
+  "Kurti",
+  "Sharara",
 ];
 
-export const CATEGORY_PRICES = {
-  Lehnga: 650,
-  "Choli collection": 699,
-  "Suits collection": 599,
-  "Sari collection": 599,
-};
+export const SHOP_CATEGORIES = ["All", ...PRODUCT_CATEGORIES];
 
 export const PRODUCT_SIZES = [
   "S",
@@ -41,10 +37,11 @@ export const getStoredProductName = (productName, isBestSeller) => {
 export const normalizeCategory = (category) => {
   const value = String(category || "").trim().toLowerCase();
 
-  if (value.includes("lehng") || value.includes("lehenga")) return "Lehnga";
-  if (value.includes("choli") || value.includes("frock")) return "Choli collection";
-  if (value.includes("sari") || value.includes("saree")) return "Sari collection";
-  if (value.includes("suit")) return "Suits collection";
+  if (value.includes("lehng") || value.includes("lehenga")) return "Lehenga";
+  if (value.includes("sari") || value.includes("saree")) return "Saree";
+  if (value.includes("sharara")) return "Sharara";
+  if (value.includes("kurti") || value.includes("choli") || value.includes("frock")) return "Kurti";
+  if (value.includes("suit")) return "Suit";
 
-  return PRODUCT_CATEGORIES.find((item) => item.toLowerCase() === value) || "Lehnga";
+  return PRODUCT_CATEGORIES.find((item) => item.toLowerCase() === value) || "Suit";
 };

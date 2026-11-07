@@ -10,11 +10,11 @@ const Footer = () => {
           {/* ================= BRAND ================= */}
           <div>
             <h2 className="font-serif text-3xl tracking-wide text-white">
-              SHANAYA 
+              VASTRA 
             </h2>
 
             <p className="text-[#F4A6B8] text-xs tracking-[5px] mt-2">
-              SHANAYA COLLECTION
+              VASTRA OFFICAIL
             </p>
 
             <p className="text-pink-100/80 leading-7 mt-6 max-w-sm">
@@ -91,19 +91,19 @@ const Footer = () => {
 
               <li>
                 <Link
-                  to="/shop?category=Choli%20collection"
+                  to="/shop?category=Kurti"
                   className="text-pink-100/80 hover:text-[#F4A6B8] transition"
                 >
-                  Choli Collection
+                  Kurti
                 </Link>
               </li>
 
               <li>
                 <Link
-                  to="/shop?category=Suits%20collection"
+                  to="/shop?category=Lehenga"
                   className="text-pink-100/80 hover:text-[#F4A6B8] transition"
                 >
-                  Suit Collection
+                  Lehenga
                 </Link>
               </li>
 
@@ -220,7 +220,7 @@ const Footer = () => {
                 />
 
                 <span className="text-pink-100/80">
-                  hello@SHANAYA COLLECTION.com
+                  hello@Vastra officialcom
                 </span>
               </div>
             </div>

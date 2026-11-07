@@ -9,7 +9,6 @@ import {
 
 import { products as staticProducts } from "../data/products";
 import {
-  CATEGORY_PRICES,
   getProductDisplayName,
   isBestSellerProduct,
   normalizeCategory,
@@ -29,7 +28,7 @@ const normalizeProduct = (product, fallbackId = Date.now()) => {
     name: getProductDisplayName(product?.name || product?.productName) || "Untitled Product",
     productName: product?.productName || product?.name || "Untitled Product",
     category: normalizeCategory(product?.category),
-    price: CATEGORY_PRICES[normalizeCategory(product?.category)],
+    price: Number(product?.price ?? 0),
     oldPrice: Number(product?.originalPrice || 999),
     rating: Number(product?.rating || 0),
     reviews: Number(product?.reviews || 0),

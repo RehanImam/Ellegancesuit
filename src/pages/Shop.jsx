@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { normalizeCategory } from "../data/productOptions";
+import { normalizeCategory, SHOP_CATEGORIES } from "../data/productOptions";
 
 const Shop = () => {
   const navigate = useNavigate();
@@ -167,6 +167,24 @@ const Shop = () => {
               className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#4a0e17]"
             />
           </div>
+        </div>
+
+        <div className="mb-6 flex flex-wrap gap-2" aria-label="Filter by category">
+          {SHOP_CATEGORIES.map((category) => (
+            <button
+              key={category}
+              type="button"
+              onClick={() => updateFilters(undefined, category)}
+              aria-pressed={selectedCategory === category}
+              className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
+                selectedCategory === category
+                  ? "border-rose-900 bg-rose-900 text-white"
+                  : "border-pink-200 bg-white text-rose-900 hover:border-rose-900"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
         </div>
 
         {/* Results Count */}

@@ -13,7 +13,7 @@ const Loader = () => {
           <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-pink-400/80 shadow-2xl bg-rose-950 flex items-center justify-center">
             <img 
               src={logoImg} 
-              alt="Shanaya collection Logo" 
+              alt="Vastra official Logo" 
               className="w-full h-full object-cover"
             />
           </div>
@@ -21,11 +21,11 @@ const Loader = () => {
 
         {/* Brand */}
         <h2 className="font-serif text-3xl font-bold text-rose-950 mt-6 tracking-wide">
-          SHANAYA 
+          VASTRA 
         </h2>
 
         <p className="text-[10px] tracking-[5px] text-pink-600 font-bold mt-1">
-          COLLECTION
+          OFFICIAL
         </p>
 
         {/* Loading Text & Sparkles */}
